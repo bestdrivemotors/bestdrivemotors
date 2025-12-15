@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function Hero() {
   return (
-    <section className="relative flex min-h-[85vh] items-center justify-center overflow-hidden pt-20">
+    <section className="relative flex items-center justify-center overflow-hidden md:p-10 p-5">
       <div className="absolute inset-0 z-0">
         <img
           alt="Luxury Car"
@@ -12,7 +12,7 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/80 to-transparent"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-background-dark via-background-dark/40 to-transparent"></div>
       </div>
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20">
+      <div className="relative z-10 mx-auto w-full max-w-7xl">
         <div className="max-w-3xl animate-fade-in-up">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 backdrop-blur-sm">
             <span className="size-2 rounded-full bg-primary animate-pulse"></span>
