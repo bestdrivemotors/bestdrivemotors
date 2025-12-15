@@ -103,6 +103,15 @@ export default function FinancePage() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+    
+    // Clear error for this field as user starts typing
+    if (errorMessages[name]) {
+      setErrorMessages((prev) => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
+      });
+    }
   };
 
   const validateCurrentStep = () => {
@@ -406,12 +415,12 @@ export default function FinancePage() {
             <div className="mb-12">
               <div className="mb-3 flex justify-between text-xs font-bold uppercase tracking-widest text-text-muted">
                 <span>Progress</span>
-                <span className="text-primary">{currentStep * 25}%</span>
+                <span className="text-primary">{(currentStep - 1) * 25}%</span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-card-dark border border-border-grey/50">
                 <div
                   className="h-full rounded-full bg-primary shadow-[0_0_12px_#D4AF37] transition-all duration-700 ease-out"
-                  style={{ width: `${currentStep * 25}%` }}
+                  style={{ width: `${(currentStep - 1) * 25}%` }}
                 ></div>
               </div>
             </div>
