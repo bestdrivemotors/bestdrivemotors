@@ -13,8 +13,13 @@ export default function Header() {
           <h2 className="text-xl font-black tracking-tight text-white lg:text-2xl font-display">
             Best Drive <span className="text-primary">Motors</span>
           </h2> */}
-          <Link  href="/">
-            <Image className='' width={"130"} alt='best-deal-motors-logo' loading="eager" height={"20"} src={'/best-deal-motors-logo.png'}    />
+          <Link href="/">
+            <h2 className="text-2xl font-black tracking-tight text-white md:text-4xl">
+              BEST DRIVE
+            </h2>
+            <h2 className="text-2xl font-black tracking-tight text-primary md:text-4xl" style={{ letterSpacing: '0.265em' }}>
+              MOTORS
+            </h2>
           </Link>
         </div>
 

@@ -20,7 +20,7 @@ export default function Hero() {
               South Auckland's Dealership
             </span>
           </div>
-          <h1 className="font-display text-5xl font-black leading-tight tracking-tight text-white md:text-7xl">
+          <h1 className="font-display text-3xl font-black leading-tight tracking-tight text-white">
             Driven by <br /> <span className="text-primary">Excellence.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-text-muted leading-relaxed">

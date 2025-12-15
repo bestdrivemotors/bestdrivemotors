@@ -34,16 +34,16 @@ export default function FinancePage() {
     suburb: '',
     postcode: '',
     residentialStatus: '',
-    yearsAtAddress: '0',
-    monthsAtAddress: '0',
+    yearsAtAddress: '',
+    monthsAtAddress: '',
     // Step 3
     employmentStatus: '',
     employerName: '',
     occupation: '',
     // Step 4
     income: '',
-    payFrequency: 'fortnightly',
-    dependents: '0',
+    payFrequency: '',
+    dependents: '',
     rentMortgage: '',
     otherLoans: '',
     termsConsent: false,
@@ -79,6 +79,23 @@ export default function FinancePage() {
       }
     }, 100);
   }, [currentStep]);
+
+  // Handle Enter/Return key to submit form
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        e.preventDefault();
+        if (currentStep === 4) {
+          handleSubmitAll();
+        } else {
+          handleNextStep();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentStep, formData, completedSteps]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -117,6 +134,36 @@ export default function FinancePage() {
     return true;
   };
 
+  const validateAllSteps = () => {
+    let allErrors = {};
+
+    // Validate Step 1
+    const step1Errors = validateStep1(formData);
+    if (Object.keys(step1Errors).length > 0) {
+      allErrors = { ...allErrors, ...step1Errors };
+    }
+
+    // Validate Step 2
+    const step2Errors = validateStep2(formData);
+    if (Object.keys(step2Errors).length > 0) {
+      allErrors = { ...allErrors, ...step2Errors };
+    }
+
+    // Validate Step 3
+    const step3Errors = validateStep3(formData);
+    if (Object.keys(step3Errors).length > 0) {
+      allErrors = { ...allErrors, ...step3Errors };
+    }
+
+    // Validate Step 4
+    const step4Errors = validateStep4(formData);
+    if (Object.keys(step4Errors).length > 0) {
+      allErrors = { ...allErrors, ...step4Errors };
+    }
+
+    return allErrors;
+  };
+
   const handleNextStep = () => {
     if (validateCurrentStep()) {
       const newCompleted = new Set(completedSteps);
@@ -140,10 +187,52 @@ export default function FinancePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateCurrentStep()) {
+    // Validate all steps before submission
+    const allErrors = validateAllSteps();
+
+    if (Object.keys(allErrors).length > 0) {
+      setErrorMessages(allErrors);
+      setShowError(true);
+      
+      // Navigate to the first step with errors
+      // Check steps in order: 1, 2, 3, 4
+      for (let step = 1; step <= 4; step++) {
+        let stepErrors = {};
+        switch (step) {
+          case 1:
+            stepErrors = validateStep1(formData);
+            break;
+          case 2:
+            stepErrors = validateStep2(formData);
+            break;
+          case 3:
+            stepErrors = validateStep3(formData);
+            break;
+          case 4:
+            stepErrors = validateStep4(formData);
+            break;
+          default:
+            break;
+        }
+        
+        if (Object.keys(stepErrors).length > 0) {
+          setCurrentStep(step);
+          break;
+        }
+      }
+      
       return;
     }
 
+    // If all validations pass, proceed with submission
+    await submitApplication();
+  };
+
+  const handleSubmitAll = () => {
+    handleSubmit({ preventDefault: () => {} });
+  };
+
+  const submitApplication = async () => {
     setIsLoading(true);
 
     try {
@@ -178,14 +267,14 @@ export default function FinancePage() {
           suburb: '',
           postcode: '',
           residentialStatus: '',
-          yearsAtAddress: '0',
-          monthsAtAddress: '0',
+          yearsAtAddress: '',
+          monthsAtAddress: '',
           employmentStatus: '',
           employerName: '',
           occupation: '',
           income: '',
-          payFrequency: 'fortnightly',
-          dependents: '0',
+          payFrequency: '',
+          dependents: '',
           rentMortgage: '',
           otherLoans: '',
           termsConsent: false,
@@ -226,7 +315,7 @@ export default function FinancePage() {
                 <span className="material-symbols-outlined text-sm">verified_user</span>
                 Secure Finance Application
               </div>
-              <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight text-white lg:text-5xl">
+              <h1 className="text-2xl font-black leading-tight tracking-tight text-white">
                 Quick Finance Application
               </h1>
               <p className="mt-4 text-base md:text-lg text-text-muted font-light">
@@ -342,7 +431,7 @@ export default function FinancePage() {
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {/* First Name */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">First Name</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">First Name <span className="text-red-500">*</span></span>
                   <input
                     type="text"
                     name="firstName"
@@ -374,7 +463,7 @@ export default function FinancePage() {
 
                 {/* Last Name */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Last Name</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Last Name <span className="text-red-500">*</span></span>
                   <input
                     type="text"
                     name="lastName"
@@ -390,7 +479,7 @@ export default function FinancePage() {
 
                 {/* Date of Birth */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Date of Birth</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Date of Birth <span className="text-red-500">*</span></span>
                   <input
                     type="date"
                     name="dateOfBirth"
@@ -405,7 +494,7 @@ export default function FinancePage() {
 
                 {/* Driver Licence Type */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Drivers Licence Type</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Drivers Licence Type <span className="text-red-500">*</span></span>
                   <select
                     name="driverLicenceType"
                     value={formData.driverLicenceType}
@@ -425,7 +514,7 @@ export default function FinancePage() {
 
                 {/* Driver Licence Number */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Drivers Licence Number</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Drivers Licence Number <span className="text-red-500">*</span></span>
                   <input
                     type="text"
                     name="driverLicenceNumber"
@@ -442,7 +531,7 @@ export default function FinancePage() {
 
                 {/* Version Number */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Version Number</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Version Number <span className="text-red-500">*</span></span>
                   <input
                     type="text"
                     name="versionNumber"
@@ -459,7 +548,7 @@ export default function FinancePage() {
 
                 {/* Licence Expiry */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Licence Expiry</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Licence Expiry <span className="text-red-500">*</span></span>
                   <input
                     type="date"
                     name="licenceExpiry"
@@ -474,7 +563,7 @@ export default function FinancePage() {
 
                 {/* Marital Status */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Marital Status</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Marital Status <span className="text-red-500">*</span></span>
                   <select
                     name="maritalStatus"
                     value={formData.maritalStatus}
@@ -494,7 +583,7 @@ export default function FinancePage() {
 
                 {/* Email Address */}
                 <label className="flex flex-col gap-2 md:col-span-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Email Address</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Email Address <span className="text-red-500">*</span></span>
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">mail</span>
                     <input
@@ -513,7 +602,7 @@ export default function FinancePage() {
 
                 {/* Mobile Phone */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Mobile Phone</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Mobile Phone <span className="text-red-500">*</span></span>
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">smartphone</span>
                     <input
@@ -554,7 +643,7 @@ export default function FinancePage() {
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                 {/* Current Address */}
                 <label className="flex flex-col gap-2 md:col-span-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Current Address</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Current Address <span className="text-red-500">*</span></span>
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">search</span>
                     <input
@@ -573,7 +662,7 @@ export default function FinancePage() {
 
                 {/* Suburb */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Suburb</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Suburb <span className="text-red-500">*</span></span>
                   <input
                     type="text"
                     name="suburb"
@@ -589,7 +678,7 @@ export default function FinancePage() {
 
                 {/* Postcode */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Postcode</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Postcode <span className="text-red-500">*</span></span>
                   <input
                     type="text"
                     name="postcode"
@@ -606,7 +695,7 @@ export default function FinancePage() {
 
                 {/* Residential Status */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Residential Status</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Residential Status <span className="text-red-500">*</span></span>
                   <select
                     name="residentialStatus"
                     value={formData.residentialStatus}
@@ -625,7 +714,7 @@ export default function FinancePage() {
 
                 {/* Time at Current Address */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Time at Current Address</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Time at Current Address <span className="text-red-500">*</span></span>
                   <div className="flex gap-4">
                     <div className="relative flex-1">
                       <input
@@ -688,7 +777,7 @@ export default function FinancePage() {
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {/* Employment Status */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Employment Status</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Employment Status <span className="text-red-500">*</span></span>
                   <select
                     name="employmentStatus"
                     value={formData.employmentStatus}
@@ -709,7 +798,7 @@ export default function FinancePage() {
 
                 {/* Employer Name */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Employer Name</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Employer Name <span className="text-red-500">*</span></span>
                   <input
                     type="text"
                     name="employerName"
@@ -725,7 +814,7 @@ export default function FinancePage() {
 
                 {/* Occupation */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Occupation</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Occupation <span className="text-red-500">*</span></span>
                   <input
                     type="text"
                     name="occupation"
@@ -767,7 +856,7 @@ export default function FinancePage() {
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {/* Income */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Income (After Tax)</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Income (After Tax) <span className="text-red-500">*</span></span>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary font-bold">$</span>
                     <input
@@ -789,6 +878,7 @@ export default function FinancePage() {
                 <label className="flex flex-col gap-2 group">
                   <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Pay Frequency</span>
                   <select name="payFrequency" value={formData.payFrequency} onChange={handleInputChange} className="h-12 w-full rounded-lg border border-border-grey bg-input-bg px-4 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                    <option value="">Select Pay Frequency</option>
                     <option value="weekly">Weekly</option>
                     <option value="fortnightly">Fortnightly</option>
                     <option value="monthly">Monthly</option>
@@ -797,13 +887,13 @@ export default function FinancePage() {
 
                 {/* Dependents */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Dependents</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Dependents <span className="text-red-500">*</span></span>
                   <input
                     type="number"
                     name="dependents"
                     value={formData.dependents}
                     onChange={handleInputChange}
-                    min="0"
+                    placeholder="0"
                     max="20"
                     className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-white placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                       errorMessages.dependents ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'
@@ -817,7 +907,7 @@ export default function FinancePage() {
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {/* Rent/Mortgage */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Rent / Mortgage (Weekly)</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Rent / Mortgage (Weekly) <span className="text-red-500">*</span></span>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary font-bold">$</span>
                     <input
@@ -837,7 +927,7 @@ export default function FinancePage() {
 
                 {/* Other Loans */}
                 <label className="flex flex-col gap-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Other Loans (Weekly)</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Other Loans (Weekly) <span className="text-red-500">*</span></span>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary font-bold">$</span>
                     <input
@@ -870,7 +960,7 @@ export default function FinancePage() {
                     />
                     <span className="material-symbols-outlined absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-black opacity-0 peer-checked:opacity-100 text-lg pointer-events-none font-bold">check</span>
                   </div>
-                  <span className="text-sm text-text-muted group-hover:text-white transition-colors leading-relaxed">I confirm that the information provided is true and correct. I authorize Best Drive Motors to perform a credit check and use my details for the purpose of assessing this finance application.</span>
+                  <span className="text-sm text-text-muted group-hover:text-white transition-colors leading-relaxed">I confirm that the information provided is true and correct. I authorize Best Drive Motors to perform a credit check and use my details for the purpose of assessing this finance application. <span className="text-red-500">*</span></span>
                 </label>
                 {errorMessages.termsConsent && <span className="text-xs text-red-400">{errorMessages.termsConsent}</span>}
 
@@ -887,7 +977,7 @@ export default function FinancePage() {
                     <span className="material-symbols-outlined absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-black opacity-0 peer-checked:opacity-100 text-lg pointer-events-none font-bold">check</span>
                   </div>
                   <span className="text-sm text-text-muted group-hover:text-white transition-colors leading-relaxed">
-                    I agree to the <a className="text-primary hover:text-primary-hover hover:underline" href="#">Privacy Policy</a> and <a className="text-primary hover:text-primary-hover hover:underline" href="#">Terms of Service</a>.
+                    I agree to the <a className="text-primary hover:text-primary-hover hover:underline" target="_blank" href="/privacy">Privacy Policy</a> <span className="text-red-500">*</span>
                   </span>
                 </label>
                 {errorMessages.privacyConsent && <span className="text-xs text-red-400">{errorMessages.privacyConsent}</span>}

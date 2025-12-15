@@ -6,9 +6,14 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
         {/* Brand Section */}
         <div className="flex flex-col gap-6">
-          <h3 className="font-display text-xl font-black">
-            Best Drive <span className="text-primary">Motors</span>
-          </h3>
+          <Link href="/">
+            <h2 className="text-3xl font-black tracking-tight text-white md:text-4xl">
+              BEST DRIVE
+            </h2>
+            <h2 className="text-3xl font-black tracking-tight text-primary md:text-4xl" style={{ letterSpacing: '0.265em' }}>
+              MOTORS
+            </h2>
+          </Link>
           <p className="text-sm text-text-muted leading-relaxed">
             South Auckland's destination for quality used vehicles and competitive finance solutions. Excellence in every drive.
           </p>
@@ -38,7 +43,7 @@ export default function Footer() {
         <div className="flex flex-col gap-6">
           <h4 className="text-lg font-bold text-white font-display">Contact Us</h4>
           <ul className="flex flex-col gap-4 text-sm text-text-muted">
-            <li className="flex items-start gap-3 group">
+            {/* <li className="flex items-start gap-3 group">
               <span className="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform">
                 location_on
               </span>
@@ -47,13 +52,13 @@ export default function Footer() {
                 <br />
                 Manukau, Auckland 2104
               </span>
-            </li>
+            </li> */}
             <li className="flex items-center gap-3 group">
               <span className="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform">
                 call
               </span>
               <a className="hover:text-primary transition-colors" href="tel:0800BESTDRIVE">
-                0800 BEST DRIVE
+                022 435 3449
               </a>
             </li>
             <li className="flex items-center gap-3 group">
@@ -62,9 +67,9 @@ export default function Footer() {
               </span>
               <a
                 className="hover:text-primary transition-colors"
-                href="mailto:sales@bestdrive.co.nz"
+                href="mailto:bestdrivemotors@outlook.co.nz"
               >
-                sales@bestdrive.co.nz
+                bestdrivemotors@outlook.co.nz
               </a>
             </li>
           </ul>
@@ -85,33 +90,9 @@ export default function Footer() {
             <li>
               <Link
                 className="hover:text-primary hover:translate-x-1 inline-block transition-all"
-                href="/stock"
-              >
-                Our Inventory
-              </Link>
-            </li>
-            <li>
-              <Link
-                className="hover:text-primary hover:translate-x-1 inline-block transition-all"
                 href="/finance"
               >
                 Finance Options
-              </Link>
-            </li>
-            <li>
-              <Link
-                className="hover:text-primary hover:translate-x-1 inline-block transition-all"
-                href="#"
-              >
-                Sell Your Car
-              </Link>
-            </li>
-            <li>
-              <Link
-                className="hover:text-primary hover:translate-x-1 inline-block transition-all"
-                href="#"
-              >
-                Privacy Policy
               </Link>
             </li>
           </ul>
@@ -139,15 +120,7 @@ export default function Footer() {
 
       {/* Bottom Section */}
       <div className="mt-12 flex flex-col md:flex-row items-center justify-between border-t border-border-subtle pt-8 text-xs text-text-muted gap-4">
-        <p>© 2024 Best Drive Motors. All rights reserved.</p>
-        <div className="flex gap-6">
-          <Link className="hover:text-white transition-colors" href="#">
-            Terms of Service
-          </Link>
-          <Link className="hover:text-white transition-colors" href="#">
-            Privacy Policy
-          </Link>
-        </div>
+        <p>© 2025 Best Drive Motors. All rights reserved.</p>
       </div>
     </footer>
   );
