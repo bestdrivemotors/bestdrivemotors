@@ -456,7 +456,7 @@ export default function FinancePage() {
                   <p className="text-sm text-text-muted mb-6">Please upload clear images or PDFs of both sides of your driver's licence.</p>
                   <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                     <label className="flex flex-col gap-4 group cursor-pointer">
-                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-hover:text-primary transition-colors">Licence Front (Image/PDF) <span className="text-red-500">*</span></span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-hover:text-primary transition-colors">Licence Front (Image/PDF)</span>
                       <div className={`relative flex items-center justify-center rounded-lg border-2 border-dashed transition-all duration-300 p-8 ${
                         formData.licenceFront ? 'border-blue-600 bg-blue-50' :
                         errorMessages.licenceFront ? 'border-red-500 bg-red-500/10' :
@@ -483,7 +483,7 @@ export default function FinancePage() {
                     </label>
 
                     <label className="flex flex-col gap-4 group cursor-pointer">
-                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-hover:text-primary transition-colors">Licence Back (Image/PDF) <span className="text-red-500">*</span></span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-hover:text-primary transition-colors">Licence Back (Image/PDF) </span>
                       <div className={`relative flex items-center justify-center rounded-lg border-2 border-dashed transition-all duration-300 p-8 ${
                         formData.licenceBack ? 'border-blue-600 bg-blue-50' :
                         errorMessages.licenceBack ? 'border-red-500 bg-red-500/10' :
@@ -549,7 +549,7 @@ export default function FinancePage() {
                   </label>
                   <label className="flex flex-col gap-2 group">
                     <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Postcode <span className="text-red-500">*</span></span>
-                    <input type="text" name="postcode" value={formData.postcode} onChange={handleInputChange} placeholder="e.g. 2104" maxLength="4"
+                    <input type="number" name="postcode" value={formData.postcode} onChange={handleInputChange} placeholder="e.g. 2104" maxLength="4"
                       className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                         errorMessages.postcode ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
                     {errorMessages.postcode && <span className="text-xs text-red-400">{errorMessages.postcode}</span>}

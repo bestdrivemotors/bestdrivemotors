@@ -167,7 +167,7 @@ export const validateStep1 = (data) => {
   }
 
   if (!validateDateOfBirthFromParts(data.dateOfBirthDay, data.dateOfBirthMonth, data.dateOfBirthYear)) {
-    errors.dateOfBirth = 'You must be at least 16 years old. Please check day, month, and year.';
+    errors.dateOfBirth = 'You must be between 16 and 120 years old';
   }
 
   if (!data.driverLicenceType) {
@@ -198,13 +198,7 @@ export const validateStep1 = (data) => {
     errors.phone = 'Valid NZ phone number is required';
   }
 
-  if (!data.licenceFront) {
-    errors.licenceFront = 'Licence front image/PDF is required';
-  }
-
-  if (!data.licenceBack) {
-    errors.licenceBack = 'Licence back image/PDF is required';
-  }
+  // Licence front and back are now optional
 
   return errors;
 };
