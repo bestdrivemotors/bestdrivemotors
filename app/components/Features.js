@@ -18,20 +18,20 @@ export default function Features() {
   ];
 
   return (
-    <section className="bg-card-dark py-12 border-y border-border-grey">
-      <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
+    <section className="bg-background-dark py-10 border-y border-border-grey">
+      <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group flex flex-col md:flex-row items-start md:items-center gap-4 p-4 rounded-xl transition-colors hover:bg-white/5 cursor-pointer"
+              className="group flex flex-col md:flex-row items-start md:items-center gap-4 p-4 rounded-xl transition-colors bg-card-dark cursor-pointer"
             >
-              <div className="flex size-12 md:size-14 items-center justify-center rounded-full bg-background-dark border border-border-grey text-text-muted group-hover:text-primary group-hover:border-primary transition-all flex-shrink-0">
+              <div className="flex size-12 md:size-14 items-center justify-center rounded-full bg-card-dark border border-primary text-primary group-hover:text-primary group-hover:border-primary transition-all flex-shrink-0">
                 <span className="material-symbols-outlined text-2xl">{feature.icon}</span>
               </div>
               <div>
                 <h3 className="font-bold text-lg text-white">{feature.title}</h3>
-                <p className="text-sm text-text-muted mt-1">{feature.description}</p>
+                <p className="text-sm text-white mt-1">{feature.description}</p>
               </div>
             </div>
           ))}

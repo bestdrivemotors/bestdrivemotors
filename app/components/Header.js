@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function Header() {
   return (
-    <header className="relative top-0 z-50 w-full border-b border-border-subtle bg-background-dark/90 px-6 py-4 backdrop-blur-md md:px-12 lg:px-20 transition-all duration-300">
+    <header className="relative top-0 z-50 w-full border-b border-border-subtle bg-card-dark/90 px-6 py-4 backdrop-blur-md md:px-12 lg:px-20 transition-all duration-300">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         {/* Logo and Brand Name */}
         <div className="flex items-center gap-3">

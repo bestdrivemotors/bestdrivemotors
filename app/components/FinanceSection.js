@@ -7,13 +7,12 @@ export default function FinanceSection() {
           className="h-full w-full object-cover opacity-10"
           src="/finance-bg.jpg"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background-dark via-card-dark/90 to-background-dark/90"></div>
       </div>
       <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-12 lg:px-20 text-center">
         <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white">
           Drive Your Dream Today
         </h2>
-        <p className="mx-auto mt-4 md:mt-6 max-w-2xl text-base md:text-lg text-text-muted px-4">
+        <p className="mx-auto mt-4 md:mt-6 max-w-2xl text-base md:text-lg text-white px-4">
           Our finance specialists work with leading lenders to secure the best rates for you. Apply online in minutes
           with our secure application process.
         </p>

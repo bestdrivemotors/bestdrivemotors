@@ -3,14 +3,14 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --primary: #d4af37;
-  --primary-hover: #B39025;
-  --background-dark: #0F0F11;
-  --card-dark: #18181B;
-  --input-bg: #27272A;
+  --primary: #D62828;
+  --primary-hover: #b60b0b;
+  --background-dark: #ffffff;
+  --card-dark: #002470;
+  --input-bg: #ffffff;
   --border-grey: #3F3F46;
-  --text-light: #F4F4F5;
-  --text-muted: #A1A1AA;
+  --text-light: #000000;
+  --text-muted: #002470;
   --font-display: "Be Vietnam Pro", sans-serif;
   --font-body: "Noto Sans", sans-serif;
 }

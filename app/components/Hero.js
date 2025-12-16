@@ -9,8 +9,8 @@ export default function Hero() {
           className="h-full w-full object-cover opacity-60"
           src="/hero-bg.jpg"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/80 to-transparent"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-background-dark via-background-dark/40 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/120 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black-dark via-black/20 to-transparent"></div>
       </div>
       <div className="relative z-10 mx-auto w-full max-w-7xl">
         <div className="max-w-3xl animate-fade-in-up">
@@ -23,7 +23,7 @@ export default function Hero() {
           <h1 className="font-display text-3xl font-black leading-tight tracking-tight text-white">
             Driven by <br /> <span className="text-primary">Excellence.</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-text-muted leading-relaxed">
+          <p className="mt-6 max-w-xl text-lg text-white leading-relaxed">
             Discover a curated collection of premium vehicles tailored to your lifestyle.
             Exceptional quality, competitive finance, and service you can trust.
           </p>
