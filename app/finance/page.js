@@ -17,23 +17,44 @@ export default function FinancePage() {
   const formRef = useRef(null);
 
   const [formData, setFormData] = useState({
-    firstName: '', middleName: '', lastName: '', dateOfBirth: '', driverLicenceType: '',
-    driverLicenceNumber: '', versionNumber: '', licenceExpiry: '', maritalStatus: '',
-    email: '', phone: '', currentAddress: '', suburb: '', postcode: '', residentialStatus: '',
+    firstName: '', middleName: '', lastName: '', 
+    dateOfBirthDay: '', dateOfBirthMonth: '', dateOfBirthYear: '',
+    driverLicenceType: '',
+    driverLicenceNumber: '', versionNumber: '', 
+    licenceExpiryDay: '', licenceExpiryMonth: '', licenceExpiryYear: '',
+    maritalStatus: '',
+    email: '', phone: '', licenceFront: '', licenceBack: '', currentAddress: '', suburb: '', postcode: '', residentialStatus: '',
     yearsAtAddress: '', monthsAtAddress: '', employmentStatus: '', employerName: '',
-    occupation: '', income: '', payFrequency: '', dependents: '', rentMortgage: '',
+    occupation: '', yearsAtEmployment: '', monthsAtEmployment: '', income: '', payFrequency: '', dependents: '', rentMortgage: '',
     otherLoans: '', termsConsent: false, privacyConsent: false,
   });
 
   useEffect(() => {
     const savedData = localStorage.getItem(STORAGE_KEY);
     const savedSteps = localStorage.getItem(COMPLETED_STEPS_KEY);
-    if (savedData) setFormData(JSON.parse(savedData));
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      // Ensure all fields have defined values to prevent controlled/uncontrolled warnings
+      // File fields are always empty on load (cannot be persisted)
+      setFormData(prev => ({
+        ...prev,
+        ...parsed,
+        licenceFront: null,
+        licenceBack: null,
+        yearsAtEmployment: parsed.yearsAtEmployment ?? '',
+        monthsAtEmployment: parsed.monthsAtEmployment ?? '',
+      }));
+    }
     if (savedSteps) setCompletedSteps(new Set(JSON.parse(savedSteps)));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      ...formData,
+      // Exclude file objects - they cannot be serialized
+      licenceFront: null,
+      licenceBack: null,
+    }));
     localStorage.setItem(COMPLETED_STEPS_KEY, JSON.stringify(Array.from(completedSteps)));
   }, [formData, completedSteps]);
 
@@ -57,8 +78,11 @@ export default function FinancePage() {
   }, [currentStep, formData, completedSteps]);
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    const { name, value, type, checked, files } = e.target;
+    setFormData((prev) => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : type === 'file' ? (files ? files[0] : null) : value 
+    }));
     if (errorMessages[name]) {
       setErrorMessages((prev) => {
         const updated = { ...prev };
@@ -135,10 +159,43 @@ export default function FinancePage() {
   const submitApplication = async () => {
     setIsLoading(true);
     try {
+      // Import the combineDateFromParts function
+      const { combineDateFromParts } = require('@/app/utils/validation');
+      
+      // Create FormData to handle file uploads
+      const submitData = new FormData();
+      
+      // Combine date fields into single date strings
+      const dateOfBirth = combineDateFromParts(formData.dateOfBirthDay, formData.dateOfBirthMonth, formData.dateOfBirthYear);
+      const licenceExpiry = combineDateFromParts(formData.licenceExpiryDay, formData.licenceExpiryMonth, formData.licenceExpiryYear);
+      
+      // Add all fields except individual date parts and files
+      Object.keys(formData).forEach(key => {
+        if (!key.includes('dateOfBirth') && !key.includes('licenceExpiry') && key !== 'licenceFront' && key !== 'licenceBack') {
+          submitData.append(key, formData[key]);
+        }
+      });
+      
+      // Add combined dates
+      submitData.append('dateOfBirth', dateOfBirth);
+      submitData.append('licenceExpiry', licenceExpiry);
+      
+      // Add files with proper naming: firstName_lastName_front and firstName_lastName_back
+      if (formData.licenceFront) {
+        const frontFileName = `${formData.firstName}_${formData.lastName}_front`;
+        const frontFile = new File([formData.licenceFront], frontFileName, { type: formData.licenceFront.type });
+        submitData.append('licenceFront', frontFile);
+      }
+      
+      if (formData.licenceBack) {
+        const backFileName = `${formData.firstName}_${formData.lastName}_back`;
+        const backFile = new File([formData.licenceBack], backFileName, { type: formData.licenceBack.type });
+        submitData.append('licenceBack', backFile);
+      }
+      
       const response = await fetch('/api/submit-finance', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: submitData,
       });
       const data = await response.json();
       if (response.ok) {
@@ -146,11 +203,15 @@ export default function FinancePage() {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(COMPLETED_STEPS_KEY);
         setFormData({
-          firstName: '', middleName: '', lastName: '', dateOfBirth: '', driverLicenceType: '',
-          driverLicenceNumber: '', versionNumber: '', licenceExpiry: '', maritalStatus: '',
-          email: '', phone: '', currentAddress: '', suburb: '', postcode: '', residentialStatus: '',
+          firstName: '', middleName: '', lastName: '', 
+          dateOfBirthDay: '', dateOfBirthMonth: '', dateOfBirthYear: '',
+          driverLicenceType: '',
+          driverLicenceNumber: '', versionNumber: '', 
+          licenceExpiryDay: '', licenceExpiryMonth: '', licenceExpiryYear: '',
+          maritalStatus: '',
+          email: '', phone: '', licenceFront: '', licenceBack: '', currentAddress: '', suburb: '', postcode: '', residentialStatus: '',
           yearsAtAddress: '', monthsAtAddress: '', employmentStatus: '', employerName: '',
-          occupation: '', income: '', payFrequency: '', dependents: '', rentMortgage: '',
+          occupation: '', yearsAtEmployment: '', monthsAtEmployment: '', income: '', payFrequency: '', dependents: '', rentMortgage: '',
           otherLoans: '', termsConsent: false, privacyConsent: false,
         });
         setCompletedSteps(new Set());
@@ -244,113 +305,212 @@ export default function FinancePage() {
 
 
               {/* STEP 1 */}
-              <section className={`${currentStep !== 1 ? 'hidden' : 'block'} animate-fade-in-slide p-6 md:p-10`}>
-                <div className="mb-10 flex items-center gap-4 border-b border-border-grey pb-6">
-                  <div className="flex size-12 items-center justify-center rounded-lg bg-input-bg text-primary border border-border-grey">
-                    <span className="material-symbols-outlined text-2xl">person</span>
+              <section className={`${currentStep !== 1 ? 'hidden' : 'block'} animate-fade-in-slide p-4 sm:p-6 md:p-10`}>
+                <div className="mb-2 flex flex-col gap-4 md:gap-6 border-b-2 border-border-grey pb-4">
+                  <div className="flex flex-row items-start gap-4 md:gap-6">
+                    <div className="flex size-14 md:size-16 items-center justify-center rounded-xl flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
+                      <span className="material-symbols-outlined text-3xl md:text-4xl">person</span>
+                    </div>
+                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-black leading-tight">Personal Details</h2>
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-black">Personal Details</h2>
-                    <p className="text-sm text-text-muted mt-1">Please provide your legal identification details.</p>
+                  <p className="text-sm md:text-base text-text-muted">Please provide your legal identification details.</p>
+                </div>
+
+                <div className="mb-8">
+                  <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-white px-4 py-3 rounded-lg" style={{ backgroundColor: '#002470', borderBottom: '2px solid #00173f' }}>Name Information</h3>
+                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <label className="flex flex-col gap-2 group">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">First Name <span className="text-red-500">*</span></span>
+                      <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} placeholder="e.g. John"
+                        className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                          errorMessages.firstName ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                      {errorMessages.firstName && <span className="text-xs text-red-400">{errorMessages.firstName}</span>}
+                    </label>
+                    <label className="flex flex-col gap-2 group">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Middle Name</span>
+                      <input type="text" name="middleName" value={formData.middleName} onChange={handleInputChange} placeholder="Optional"
+                        className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                          errorMessages.middleName ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                      {errorMessages.middleName && <span className="text-xs text-red-400">{errorMessages.middleName}</span>}
+                    </label>
+                    <label className="flex flex-col gap-2 group">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Last Name <span className="text-red-500">*</span></span>
+                      <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} placeholder="e.g. Doe"
+                        className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                          errorMessages.lastName ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                      {errorMessages.lastName && <span className="text-xs text-red-400">{errorMessages.lastName}</span>}
+                    </label>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                  <label className="flex flex-col gap-2 group">
-                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">First Name <span className="text-red-500">*</span></span>
-                    <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} placeholder="e.g. John"
-                      className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
-                        errorMessages.firstName ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
-                    {errorMessages.firstName && <span className="text-xs text-red-400">{errorMessages.firstName}</span>}
-                  </label>
-                  <label className="flex flex-col gap-2 group">
-                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Middle Name</span>
-                    <input type="text" name="middleName" value={formData.middleName} onChange={handleInputChange} placeholder="Optional"
-                      className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
-                        errorMessages.middleName ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
-                    {errorMessages.middleName && <span className="text-xs text-red-400">{errorMessages.middleName}</span>}
-                  </label>
-                  <label className="flex flex-col gap-2 group">
-                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Last Name <span className="text-red-500">*</span></span>
-                    <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} placeholder="e.g. Doe"
-                      className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
-                        errorMessages.lastName ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
-                    {errorMessages.lastName && <span className="text-xs text-red-400">{errorMessages.lastName}</span>}
-                  </label>
-                  <label className="flex flex-col gap-2 group">
-                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Date of Birth <span className="text-red-500">*</span></span>
-                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange}
-                      className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black focus:ring-1 outline-none transition-all [color-scheme:dark] ${
-                        errorMessages.dateOfBirth ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
-                    {errorMessages.dateOfBirth && <span className="text-xs text-red-400">{errorMessages.dateOfBirth}</span>}
-                  </label>
-                  <label className="flex flex-col gap-2 group">
-                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Drivers Licence Type <span className="text-red-500">*</span></span>
-                    <select name="driverLicenceType" value={formData.driverLicenceType} onChange={handleInputChange}
-                      className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black focus:ring-1 outline-none transition-all ${
-                        errorMessages.driverLicenceType ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`}>
-                      <option value="">Select type</option>
-                      <option value="learners">Learners Licence</option>
-                      <option value="restricted">Restricted Licence</option>
-                      <option value="full">Full Licence</option>
-                      <option value="overseas">Overseas Licence</option>
-                    </select>
-                    {errorMessages.driverLicenceType && <span className="text-xs text-red-400">{errorMessages.driverLicenceType}</span>}
-                  </label>
-                  <label className="flex flex-col gap-2 group">
-                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Drivers Licence Number <span className="text-red-500">*</span></span>
-                    <input type="text" name="driverLicenceNumber" value={formData.driverLicenceNumber} onChange={handleInputChange} placeholder="e.g. AA000000" maxLength="8"
-                      className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all uppercase ${
-                        errorMessages.driverLicenceNumber ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
-                    {errorMessages.driverLicenceNumber && <span className="text-xs text-red-400">{errorMessages.driverLicenceNumber}</span>}
-                  </label>
-                  <label className="flex flex-col gap-2 group">
-                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Version Number <span className="text-red-500">*</span></span>
-                    <input type="text" name="versionNumber" value={formData.versionNumber} onChange={handleInputChange} maxLength="3" placeholder="e.g. 123"
-                      className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
-                        errorMessages.versionNumber ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
-                    {errorMessages.versionNumber && <span className="text-xs text-red-400">{errorMessages.versionNumber}</span>}
-                  </label>
-                  <label className="flex flex-col gap-2 group">
-                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Licence Expiry <span className="text-red-500">*</span></span>
-                    <input type="date" name="licenceExpiry" value={formData.licenceExpiry} onChange={handleInputChange}
-                      className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black focus:ring-1 outline-none transition-all [color-scheme:dark] ${
-                        errorMessages.licenceExpiry ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
-                    {errorMessages.licenceExpiry && <span className="text-xs text-red-400">{errorMessages.licenceExpiry}</span>}
-                  </label>
-                  <label className="flex flex-col gap-2 group">
-                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Marital Status <span className="text-red-500">*</span></span>
-                    <select name="maritalStatus" value={formData.maritalStatus} onChange={handleInputChange}
-                      className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black focus:ring-1 outline-none transition-all ${
-                        errorMessages.maritalStatus ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`}>
-                      <option value="">Select status</option>
-                      <option value="single">Single</option>
-                      <option value="married">Married</option>
-                      <option value="defacto">De Facto</option>
-                      <option value="divorced">Divorced</option>
-                    </select>
-                    {errorMessages.maritalStatus && <span className="text-xs text-red-400">{errorMessages.maritalStatus}</span>}
-                  </label>
-                  <label className="flex flex-col gap-2 md:col-span-2 group">
-                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Email Address <span className="text-red-500">*</span></span>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">mail</span>
-                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="john.doe@example.com"
-                        className={`h-12 w-full rounded-lg border bg-input-bg pl-12 pr-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
-                          errorMessages.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+
+                <div className="mb-8">
+                  <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-white px-4 py-3 rounded-lg" style={{ backgroundColor: '#002470', borderBottom: '2px solid #00173f' }}>Personal Information</h3>
+                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted transition-colors">Date of Birth <span className="text-red-500">*</span></span>
+                      <div className="flex gap-3 md:gap-4">
+                        <input type="number" name="dateOfBirthDay" value={formData.dateOfBirthDay} onChange={handleInputChange} placeholder="Day" min="1" max="31"
+                          className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                            errorMessages.dateOfBirth ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                        <input type="number" name="dateOfBirthMonth" value={formData.dateOfBirthMonth} onChange={handleInputChange} placeholder="Month" min="1" max="12"
+                          className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                            errorMessages.dateOfBirth ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                        <input type="number" name="dateOfBirthYear" value={formData.dateOfBirthYear} onChange={handleInputChange} placeholder="Year" min={new Date().getFullYear() - 120} max={new Date().getFullYear() - 16}
+                          className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                            errorMessages.dateOfBirth ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                      </div>
+                      {errorMessages.dateOfBirth && <span className="text-xs text-red-400">{errorMessages.dateOfBirth}</span>}
                     </div>
-                    {errorMessages.email && <span className="text-xs text-red-400">{errorMessages.email}</span>}
-                  </label>
-                  <label className="flex flex-col gap-2 group">
-                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Mobile Phone <span className="text-red-500">*</span></span>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">smartphone</span>
-                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="021 123 4567"
-                        className={`h-12 w-full rounded-lg border bg-input-bg pl-12 pr-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
-                          errorMessages.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
-                    </div>
-                    {errorMessages.phone && <span className="text-xs text-red-400">{errorMessages.phone}</span>}
-                  </label>
+                    <label className="flex flex-col gap-2 group">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Marital Status <span className="text-red-500">*</span></span>
+                      <select name="maritalStatus" value={formData.maritalStatus} onChange={handleInputChange}
+                        className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black focus:ring-1 outline-none transition-all ${
+                          errorMessages.maritalStatus ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`}>
+                        <option value="">Select status</option>
+                        <option value="single">Single</option>
+                        <option value="married">Married</option>
+                        <option value="defacto">De Facto</option>
+                        <option value="divorced">Divorced</option>
+                      </select>
+                      {errorMessages.maritalStatus && <span className="text-xs text-red-400">{errorMessages.maritalStatus}</span>}
+                    </label>
+                  </div>
                 </div>
+
+                <div className="mb-8">
+                  <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-white px-4 py-3 rounded-lg" style={{ backgroundColor: '#002470', borderBottom: '2px solid #00173f' }}>Contact Information</h3>
+                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                    <label className="flex flex-col gap-2 group">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Email Address <span className="text-red-500">*</span></span>
+                      <div className="relative">
+                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">mail</span>
+                        <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="john.doe@example.com"
+                          className={`h-12 w-full rounded-lg border bg-input-bg pl-12 pr-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                            errorMessages.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                      </div>
+                      {errorMessages.email && <span className="text-xs text-red-400">{errorMessages.email}</span>}
+                    </label>
+                    <label className="flex flex-col gap-2 group">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Mobile Phone <span className="text-red-500">*</span></span>
+                      <div className="relative">
+                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">smartphone</span>
+                        <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="021 123 4567"
+                          className={`h-12 w-full rounded-lg border bg-input-bg pl-12 pr-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                            errorMessages.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                      </div>
+                      {errorMessages.phone && <span className="text-xs text-red-400">{errorMessages.phone}</span>}
+                    </label>
+                  </div>
+                </div>
+
+                <div className="mb-8">
+                  <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-white px-4 py-3 rounded-lg" style={{ backgroundColor: '#002470', borderBottom: '2px solid #00173f' }}>Driver's Licence Details</h3>
+                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <label className="flex flex-col gap-2 group">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Drivers Licence Type <span className="text-red-500">*</span></span>
+                      <select name="driverLicenceType" value={formData.driverLicenceType} onChange={handleInputChange}
+                        className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black focus:ring-1 outline-none transition-all ${
+                          errorMessages.driverLicenceType ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`}>
+                        <option value="">Select type</option>
+                        <option value="learners">Learners Licence</option>
+                        <option value="restricted">Restricted Licence</option>
+                        <option value="full">Full Licence</option>
+                        <option value="overseas">Overseas Licence</option>
+                      </select>
+                      {errorMessages.driverLicenceType && <span className="text-xs text-red-400">{errorMessages.driverLicenceType}</span>}
+                    </label>
+                    <label className="flex flex-col gap-2 group">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Drivers Licence Number <span className="text-red-500">*</span></span>
+                      <input type="text" name="driverLicenceNumber" value={formData.driverLicenceNumber} onChange={handleInputChange} placeholder="e.g. AA000000" maxLength="8"
+                        className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all uppercase ${
+                          errorMessages.driverLicenceNumber ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                      {errorMessages.driverLicenceNumber && <span className="text-xs text-red-400">{errorMessages.driverLicenceNumber}</span>}
+                    </label>
+                    <label className="flex flex-col gap-2 group">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Version Number <span className="text-red-500">*</span></span>
+                      <input type="text" name="versionNumber" value={formData.versionNumber} onChange={handleInputChange} maxLength="3" placeholder="e.g. 123"
+                        className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                          errorMessages.versionNumber ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                      {errorMessages.versionNumber && <span className="text-xs text-red-400">{errorMessages.versionNumber}</span>}
+                    </label>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted transition-colors">Licence Expiry <span className="text-red-500">*</span></span>
+                      <div className="flex gap-3 md:gap-4">
+                        <input type="number" name="licenceExpiryDay" value={formData.licenceExpiryDay} onChange={handleInputChange} placeholder="Day" min="1" max="31"
+                          className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                            errorMessages.licenceExpiry ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                        <input type="number" name="licenceExpiryMonth" value={formData.licenceExpiryMonth} onChange={handleInputChange} placeholder="Month" min="1" max="12"
+                          className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                            errorMessages.licenceExpiry ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                        <input type="number" name="licenceExpiryYear" value={formData.licenceExpiryYear} onChange={handleInputChange} placeholder="Year" min={new Date().getFullYear()} max={new Date().getFullYear() + 30}
+                          className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                            errorMessages.licenceExpiry ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                      </div>
+                      {errorMessages.licenceExpiry && <span className="text-xs text-red-400">{errorMessages.licenceExpiry}</span>}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-8">
+                  <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-white px-4 py-3 rounded-lg" style={{ backgroundColor: '#002470', borderBottom: '2px solid #00173f' }}>Licence Documentation</h3>
+                  <p className="text-sm text-text-muted mb-6">Please upload clear images or PDFs of both sides of your driver's licence.</p>
+                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                    <label className="flex flex-col gap-4 group cursor-pointer">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-hover:text-primary transition-colors">Licence Front (Image/PDF) <span className="text-red-500">*</span></span>
+                      <div className={`relative flex items-center justify-center rounded-lg border-2 border-dashed transition-all duration-300 p-8 ${
+                        formData.licenceFront ? 'border-blue-600 bg-blue-50' :
+                        errorMessages.licenceFront ? 'border-red-500 bg-red-500/10' :
+                        'border-border-grey bg-input-bg group-hover:border-primary group-hover:bg-primary/5'}`} style={formData.licenceFront ? { borderColor: '#002470', backgroundColor: '#E8F0F8' } : {}}>
+                        <input type="file" name="licenceFront" onChange={handleInputChange} accept=".jpg,.jpeg,.png,.pdf,.svg,.webp,.gif,.tiff,.tif" 
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                        <div className="flex flex-col items-center gap-3 pointer-events-none">
+                          {formData.licenceFront ? (
+                            <>
+                              <span className="material-symbols-outlined text-3xl" style={{ color: '#002470' }}>check_circle</span>
+                              <span className="text-sm font-semibold text-center break-all" style={{ color: '#002470' }}>{formData.licenceFront.name}</span>
+                              <span className="text-xs text-text-muted">Click to replace</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="material-symbols-outlined text-3xl text-text-muted group-hover:text-primary transition-colors">cloud_upload</span>
+                              <span className="text-sm font-semibold text-text-muted group-hover:text-primary transition-colors">Click to upload or drag</span>
+                              <span className="text-xs text-text-muted">JPG, JPEG, PNG, PDF, SVG, WebP, GIF, TIFF (max 5MB)</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {errorMessages.licenceFront && <span className="text-xs text-red-400 flex items-center gap-1"><span className="material-symbols-outlined text-sm">error</span>{errorMessages.licenceFront}</span>}
+                    </label>
+
+                    <label className="flex flex-col gap-4 group cursor-pointer">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-hover:text-primary transition-colors">Licence Back (Image/PDF) <span className="text-red-500">*</span></span>
+                      <div className={`relative flex items-center justify-center rounded-lg border-2 border-dashed transition-all duration-300 p-8 ${
+                        formData.licenceBack ? 'border-blue-600 bg-blue-50' :
+                        errorMessages.licenceBack ? 'border-red-500 bg-red-500/10' :
+                        'border-border-grey bg-input-bg group-hover:border-primary group-hover:bg-primary/5'}`} style={formData.licenceBack ? { borderColor: '#002470', backgroundColor: '#E8F0F8' } : {}}>
+                        <input type="file" name="licenceBack" onChange={handleInputChange} accept=".jpg,.jpeg,.png,.pdf,.svg,.webp,.gif,.tiff,.tif"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                        <div className="flex flex-col items-center gap-3 pointer-events-none">
+                          {formData.licenceBack ? (
+                            <>
+                              <span className="material-symbols-outlined text-3xl" style={{ color: '#002470' }}>check_circle</span>
+                              <span className="text-sm font-semibold text-center break-all" style={{ color: '#002470' }}>{formData.licenceBack.name}</span>
+                              <span className="text-xs text-text-muted">Click to replace</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="material-symbols-outlined text-3xl text-text-muted group-hover:text-primary transition-colors">cloud_upload</span>
+                              <span className="text-sm font-semibold text-text-muted group-hover:text-primary transition-colors">Click to upload or drag</span>
+                              <span className="text-xs text-text-muted">JPG, JPEG, PNG, PDF, SVG, WebP, GIF, TIFF (max 5MB)</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {errorMessages.licenceBack && <span className="text-xs text-red-400 flex items-center gap-1"><span className="material-symbols-outlined text-sm">error</span>{errorMessages.licenceBack}</span>}
+                    </label>
+                  </div>
+                </div>
+
                 <div className="mt-10 flex justify-end border-t border-border-grey pt-8">
                   <button type="button" onClick={handleNextStep} className="cursor-pointer flex h-12 items-center justify-center gap-3 rounded-lg bg-primary px-8 text-sm font-bold uppercase tracking-wide text-white transition-all hover:bg-primary-hover hover:scale-[1.02] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
                     Next Step <span className="material-symbols-outlined text-lg">arrow_forward</span>
@@ -359,15 +519,15 @@ export default function FinancePage() {
               </section>
 
               {/* STEP 2 */}
-              <section className={`${currentStep !== 2 ? 'hidden' : 'block'} animate-fade-in-slide p-6 md:p-10`}>
-                <div className="mb-10 flex items-center gap-4 border-b border-border-grey pb-6">
-                  <div className="flex size-12 items-center justify-center rounded-lg bg-input-bg text-primary border border-border-grey">
-                    <span className="material-symbols-outlined text-2xl">home</span>
+              <section className={`${currentStep !== 2 ? 'hidden' : 'block'} animate-fade-in-slide p-4 sm:p-6 md:p-10`}>
+                <div className="mb-2 flex flex-col gap-4 md:gap-6 border-b-2 border-border-grey pb-4">
+                  <div className="flex flex-row items-start gap-4 md:gap-6">
+                    <div className="flex size-14 md:size-16 items-center justify-center rounded-xl flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
+                      <span className="material-symbols-outlined text-3xl md:text-4xl">home</span>
+                    </div>
+                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-black leading-tight">Residential Information</h2>
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-black">Residential Information</h2>
-                    <p className="text-sm text-text-muted mt-1">Where are you currently living?</p>
-                  </div>
+                  <p className="text-sm md:text-base text-text-muted">Where are you currently living?</p>
                 </div>
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                   <label className="flex flex-col gap-2 md:col-span-2 group">
@@ -431,15 +591,15 @@ export default function FinancePage() {
               </section>
 
               {/* STEP 3 */}
-              <section className={`${currentStep !== 3 ? 'hidden' : 'block'} animate-fade-in-slide p-6 md:p-10`}>
-                <div className="mb-10 flex items-center gap-4 border-b border-border-grey pb-6">
-                  <div className="flex size-12 items-center justify-center rounded-lg bg-input-bg text-primary border border-border-grey">
-                    <span className="material-symbols-outlined text-2xl">work</span>
+              <section className={`${currentStep !== 3 ? 'hidden' : 'block'} animate-fade-in-slide p-4 sm:p-6 md:p-10`}>
+                <div className="mb-2 flex flex-col gap-4 md:gap-6 border-b-2 border-border-grey pb-4">
+                  <div className="flex flex-row items-start gap-4 md:gap-6">
+                    <div className="flex size-14 md:size-16 items-center justify-center rounded-xl flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
+                      <span className="material-symbols-outlined text-3xl md:text-4xl">work</span>
+                    </div>
+                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-black leading-tight">Employment Details</h2>
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-black">Employment Details</h2>
-                    <p className="text-sm text-text-muted mt-1">Tell us about your current employment.</p>
-                  </div>
+                  <p className="text-sm md:text-base text-text-muted">Tell us about your current employment.</p>
                 </div>
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                   <label className="flex flex-col gap-2 group">
@@ -471,6 +631,21 @@ export default function FinancePage() {
                     {errorMessages.occupation && <span className="text-xs text-red-400">{errorMessages.occupation}</span>}
                   </label>
                 </div>
+                <div className="mb-8 mt-6">
+                  <label className="flex flex-col gap-2 group">
+                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Time at Current Employment <span className="text-red-500">*</span></span>
+                    <div className="flex gap-4">
+                      <input type="number" name="yearsAtEmployment" value={formData.yearsAtEmployment} onChange={handleInputChange} placeholder="Years" min="0"
+                        className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                          errorMessages.yearsAtEmployment ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                      <input type="number" name="monthsAtEmployment" value={formData.monthsAtEmployment} onChange={handleInputChange} placeholder="Months" min="0" max="11"
+                        className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
+                          errorMessages.monthsAtEmployment ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                    </div>
+                    {(errorMessages.yearsAtEmployment || errorMessages.monthsAtEmployment) && 
+                      <span className="text-xs text-red-400">{errorMessages.yearsAtEmployment || errorMessages.monthsAtEmployment}</span>}
+                  </label>
+                  </div>
                 <div className="mt-10 flex justify-between border-t border-border-grey pt-8 gap-4">
                   <button type="button" onClick={handlePreviousStep} className="cursor-pointer flex h-12 items-center justify-center gap-2 rounded-lg border border-border-grey bg-transparent px-8 text-sm font-bold uppercase tracking-wide text-text-muted transition-all hover:bg-white/5 hover:text-black ">
                     <span className="material-symbols-outlined text-lg">arrow_back</span> Back
@@ -482,15 +657,15 @@ export default function FinancePage() {
               </section>
 
               {/* STEP 4 */}
-              <section className={`${currentStep !== 4 ? 'hidden' : 'block'} animate-fade-in-slide p-6 md:p-10`}>
-                <div className="mb-10 flex items-center gap-4 border-b border-border-grey pb-6">
-                  <div className="flex size-12 items-center justify-center rounded-lg bg-input-bg text-primary border border-border-grey">
-                    <span className="material-symbols-outlined text-2xl">payments</span>
+              <section className={`${currentStep !== 4 ? 'hidden' : 'block'} animate-fade-in-slide p-4 sm:p-6 md:p-10`}>
+                <div className="mb-2 flex flex-col gap-4 md:gap-6 border-b-2 border-border-grey pb-4">
+                  <div className="flex flex-row items-start gap-4 md:gap-6">
+                    <div className="flex size-14 md:size-16 items-center justify-center rounded-xl flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
+                      <span className="material-symbols-outlined text-3xl md:text-4xl">payments</span>
+                    </div>
+                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-black leading-tight">Financial Information</h2>
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-black">Financial Information</h2>
-                    <p className="text-sm text-text-muted mt-1">Your income and expense details help us assess affordability.</p>
-                  </div>
+                  <p className="text-sm md:text-base text-text-muted">Your income and expense details help us assess affordability.</p>
                 </div>
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                   <label className="flex flex-col gap-2 group">

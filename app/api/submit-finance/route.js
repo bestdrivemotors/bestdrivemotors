@@ -2,11 +2,30 @@ import nodemailer from 'nodemailer';
 
 /**
  * POST /api/submit-finance
- * Submits finance application and sends email notification
+ * Submits finance application and sends email notification with file attachments
  */
 export async function POST(request) {
   try {
-    const formData = await request.json();
+    const formDataRaw = await request.formData();
+    
+    // Extract form fields and files
+    const formData = {};
+    const attachments = [];
+    
+    for (const [key, value] of formDataRaw.entries()) {
+      if (value instanceof File) {
+        // Handle file uploads
+        const buffer = await value.arrayBuffer();
+        attachments.push({
+          filename: value.name,
+          content: Buffer.from(buffer),
+          contentType: value.type,
+        });
+      } else {
+        // Handle form fields
+        formData[key] = value;
+      }
+    }
 
     // Validate form data
     if (!formData.email || !formData.firstName || !formData.lastName) {
@@ -27,13 +46,14 @@ export async function POST(request) {
     // Format form data for email
     const emailContent = generateEmailContent(formData);
 
-    // Send email to admin
+    // Send email to admin with attachments
     await transporter.sendMail({
       from: process.env.EMAIL_FROM,
       to: process.env.EMAIL_TO,
       subject: `New Finance Application - ${formData.firstName} ${formData.lastName}`,
       html: emailContent.admin,
       text: emailContent.adminText,
+      attachments: attachments,
     });
 
     return Response.json(
@@ -61,83 +81,168 @@ function generateEmailContent(data) {
     <!DOCTYPE html>
     <html>
     <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
         body {
           font-family: 'Be Vietnam Pro', 'Arial', sans-serif;
           line-height: 1.6;
           color: #333;
           background-color: #f5f5f5;
         }
+        .wrapper {
+          width: 100%;
+          background-color: #f5f5f5;
+          padding: 20px 0;
+        }
         .container {
           max-width: 600px;
-          margin: 20px auto;
+          margin: 0 auto;
           background-color: #fff;
-          border-radius: 10px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
           overflow: hidden;
         }
         .header {
-          background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-          color: #D4AF37;
-          padding: 30px;
+          background: linear-gradient(135deg, #002470 0%, #00173f 100%);
+          color: #ffffff;
+          padding: 40px 20px;
           text-align: center;
+          border-bottom: 4px solid #D62828;
         }
         .header h1 {
-          margin: 0;
-          font-size: 28px;
+          margin: 0 0 10px 0;
+          font-size: 32px;
           font-weight: 900;
+          letter-spacing: 1px;
+        }
+        .header p {
+          margin: 0;
+          font-size: 14px;
+          font-weight: 500;
+          opacity: 0.95;
         }
         .content {
-          padding: 30px;
+          padding: 40px 20px;
+        }
+        @media (min-width: 600px) {
+          .header {
+            padding: 50px 40px;
+          }
+          .header h1 {
+            font-size: 36px;
+          }
+          .content {
+            padding: 40px 40px;
+          }
         }
         .section {
           margin-bottom: 30px;
+          border-radius: 8px;
+          background-color: #f9f9f9;
+          padding: 20px;
         }
         .section h2 {
-          color: #D4AF37;
-          font-size: 18px;
-          border-bottom: 2px solid #D4AF37;
-          padding-bottom: 10px;
+          color: #002470;
+          font-size: 16px;
+          font-weight: 900;
+          border-bottom: 3px solid #002470;
+          padding-bottom: 12px;
           margin-bottom: 15px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        @media (min-width: 600px) {
+          .section h2 {
+            font-size: 18px;
+          }
         }
         .detail-row {
           display: flex;
           justify-content: space-between;
-          padding: 8px 0;
-          border-bottom: 1px solid #eee;
+          padding: 10px 0;
+          border-bottom: 1px solid #e0e0e0;
+          font-size: 14px;
+        }
+        .detail-row:last-child {
+          border-bottom: none;
         }
         .detail-label {
-          font-weight: bold;
+          font-weight: 600;
           color: #666;
         }
         .detail-value {
           text-align: right;
           color: #333;
+          font-weight: 500;
+        }
+        @media (min-width: 600px) {
+          .detail-row {
+            font-size: 15px;
+          }
         }
         .footer {
-          background-color: #f9f9f9;
-          padding: 20px 30px;
-          border-top: 1px solid #eee;
+          background: linear-gradient(135deg, #f9f9f9 0%, #f0f0f0 100%);
+          padding: 30px 20px;
+          border-top: 3px solid #002470;
           text-align: center;
           font-size: 12px;
           color: #666;
         }
+        .footer p {
+          margin: 5px 0;
+        }
+        .footer-contact {
+          color: #002470;
+          font-weight: 600;
+          margin-top: 15px;
+        }
+        @media (min-width: 600px) {
+          .footer {
+            padding: 40px 40px;
+            font-size: 13px;
+          }
+        }
         .button {
           display: inline-block;
-          background-color: #D4AF37;
-          color: #000;
-          padding: 12px 30px;
+          background-color: #D62828;
+          color: #fff;
+          padding: 14px 32px;
           text-decoration: none;
-          border-radius: 5px;
+          border-radius: 6px;
           margin-top: 20px;
           font-weight: bold;
+          font-size: 14px;
+          transition: background-color 0.3s;
+        }
+        .button:hover {
+          background-color: #b81f1f;
+        }
+        .alert {
+          background-color: #e8f4f8;
+          border-left: 4px solid #002470;
+          color: #00173f;
+          padding: 15px;
+          border-radius: 4px;
+          margin-bottom: 20px;
+          font-size: 14px;
         }
       </style>
     </head>
     <body>
-      <div class="container">
-        <div class="header">
-          <h1>Best Drive Motors</h1>
+      <div class="wrapper">
+        <div class="container">
+          <div class="header">
+            <h1>Best Drive Motors</h1>
+            <p>Finance Application Confirmation</p>
+          </div>
+          <div class="content">
+            <div class="alert">
+              <strong>Thank you!</strong> We have received your finance application. Our team will review it shortly.
+            </div>
           <p>Finance Application Confirmation</p>
         </div>
 
@@ -202,6 +307,10 @@ function generateEmailContent(data) {
               <span class="detail-label">Occupation:</span>
               <span class="detail-value">${data.occupation}</span>
             </div>
+            <div class="detail-row">
+              <span class="detail-label">Time at Employment:</span>
+              <span class="detail-value">${data.yearsAtEmployment} years ${data.monthsAtEmployment} months</span>
+            </div>
           </div>
 
           <div class="section">
@@ -234,9 +343,9 @@ function generateEmailContent(data) {
         </div>
 
         <div class="footer">
-          <p>&copy; 2024 Best Drive Motors. All rights reserved.</p>
-          <p>This is an automated email. Please do not reply directly to this email.</p>
-        </div>
+          <p>&copy; 2025 Best Drive Motors. All rights reserved.</p>
+          <p>This is an automated email. Please do not reply directly to this email.</p>          <div class=\"footer-contact\">0800 BEST DRIVE</div>
+        </div>        </div>
       </div>
     </body>
     </html>
@@ -261,6 +370,8 @@ Residential Information:
 Employment Information:
 - Status: ${capitalizeFirstLetter(data.employmentStatus)}
 - Employer: ${data.employerName}
+- Occupation: ${data.occupation}
+- Time at Employment: ${data.yearsAtEmployment} years ${data.monthsAtEmployment} months
 
 Financial Information:
 - Annual Income: $${parseFloat(data.income).toFixed(2)}
@@ -290,8 +401,8 @@ Contact: 0800 BEST DRIVE
           overflow: hidden;
         }
         .header {
-          background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-          color: #D4AF37;
+          background: linear-gradient(135deg, #002470 0%, #00173f 100%);
+          color: #ffffff;
           padding: 30px;
           text-align: center;
         }
@@ -307,9 +418,9 @@ Contact: 0800 BEST DRIVE
           margin-bottom: 30px;
         }
         .section h2 {
-          color: #D4AF37;
+          color: #002470;
           font-size: 18px;
-          border-bottom: 2px solid #D4AF37;
+          border-bottom: 2px solid #002470;
           padding-bottom: 10px;
           margin-bottom: 15px;
         }
@@ -419,6 +530,10 @@ Contact: 0800 BEST DRIVE
               <span class="detail-label">Occupation:</span>
               <span class="detail-value">${data.occupation}</span>
             </div>
+            <div class="detail-row">
+              <span class="detail-label">Time at Employment:</span>
+              <span class="detail-value">${data.yearsAtEmployment} years ${data.monthsAtEmployment} months</span>
+            </div>
           </div>
 
           <div class="section">
@@ -459,7 +574,7 @@ Contact: 0800 BEST DRIVE
         </div>
 
         <div class="footer">
-          <p>&copy; 2024 Best Drive Motors. All rights reserved.</p>
+          <p>&copy; 2025 Best Drive Motors. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -488,6 +603,7 @@ EMPLOYMENT INFORMATION:
 - Status: ${capitalizeFirstLetter(data.employmentStatus)}
 - Employer: ${data.employerName}
 - Occupation: ${data.occupation}
+- Time at Employment: ${data.yearsAtEmployment} years ${data.monthsAtEmployment} months
 
 FINANCIAL INFORMATION:
 - Income (After Tax): $${parseFloat(data.income).toFixed(2)}

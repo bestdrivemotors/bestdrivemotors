@@ -8,9 +8,24 @@ export const validateEmail = (email) => {
 };
 
 export const validatePhoneNZ = (phone) => {
-  // NZ phone number format: 02x xxx xxxx or 04x xxx xxxx or similar
-  const phoneRegex = /^(\+64|0)[\d\s\-()]{8,}$/;
-  return phoneRegex.test(phone.replace(/\s/g, ''));
+  // Validate phone as a numeric value with at least 7 digits
+  const phoneDigits = phone.replace(/\D/g, '');
+  return phoneDigits.length >= 7;
+};
+
+export const validateFileUpload = (file) => {
+  if (!file) return false;
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  const allowedTypes = [
+    'image/jpeg',      // JPG, JPEG
+    'image/png',       // PNG
+    'application/pdf', // PDF
+    'image/svg+xml',   // SVG
+    'image/webp',      // WebP
+    'image/gif',       // GIF
+    'image/tiff',      // TIFF
+  ];
+  return file.size <= maxSize && allowedTypes.includes(file.type);
 };
 
 export const validateDriversLicenceNumber = (licenceNumber) => {
@@ -81,6 +96,58 @@ export const validateDependents = (dependents) => {
   return !isNaN(depNum) && depNum >= 0 && depNum <= 20;
 };
 
+export const combineDateFromParts = (day, month, year) => {
+  // Combine day, month, year into a date string format YYYY-MM-DD
+  const dayNum = parseInt(day, 10);
+  const monthNum = parseInt(month, 10);
+  const yearNum = parseInt(year, 10);
+  
+  if (!day || !month || !year || isNaN(dayNum) || isNaN(monthNum) || isNaN(yearNum)) {
+    return null;
+  }
+  
+  // Pad with zeros
+  const paddedMonth = String(monthNum).padStart(2, '0');
+  const paddedDay = String(dayNum).padStart(2, '0');
+  
+  return `${yearNum}-${paddedMonth}-${paddedDay}`;
+};
+
+export const validateDateOfBirthFromParts = (day, month, year) => {
+  const dateStr = combineDateFromParts(day, month, year);
+  if (!dateStr) return false;
+  
+  const birthDate = new Date(dateStr);
+  const today = new Date();
+  
+  // Check if date is valid
+  if (isNaN(birthDate.getTime())) return false;
+  
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  
+  // Must be at least 16 years old
+  return age >= 16 && age <= 120;
+};
+
+export const validateDateNotInPastFromParts = (day, month, year) => {
+  const dateStr = combineDateFromParts(day, month, year);
+  if (!dateStr) return false;
+  
+  const selectedDate = new Date(dateStr);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Check if date is valid
+  if (isNaN(selectedDate.getTime())) return false;
+  
+  return selectedDate >= today;
+};
+
 /**
  * Step-specific validation functions
  */
@@ -99,8 +166,8 @@ export const validateStep1 = (data) => {
     errors.lastName = 'Last name is required and must be 2-100 characters';
   }
 
-  if (!validateDateOfBirth(data.dateOfBirth)) {
-    errors.dateOfBirth = 'You must be at least 16 years old';
+  if (!validateDateOfBirthFromParts(data.dateOfBirthDay, data.dateOfBirthMonth, data.dateOfBirthYear)) {
+    errors.dateOfBirth = 'You must be at least 16 years old. Please check day, month, and year.';
   }
 
   if (!data.driverLicenceType) {
@@ -115,8 +182,8 @@ export const validateStep1 = (data) => {
     errors.versionNumber = 'Version number must be 1-3 digits';
   }
 
-  if (!validateDateNotInPast(data.licenceExpiry)) {
-    errors.licenceExpiry = 'Licence expiry date must be in the future';
+  if (!validateDateNotInPastFromParts(data.licenceExpiryDay, data.licenceExpiryMonth, data.licenceExpiryYear)) {
+    errors.licenceExpiry = 'Licence expiry date must be in the future. Please check day, month, and year.';
   }
 
   if (!data.maritalStatus) {
@@ -129,6 +196,14 @@ export const validateStep1 = (data) => {
 
   if (!validatePhoneNZ(data.phone)) {
     errors.phone = 'Valid NZ phone number is required';
+  }
+
+  if (!data.licenceFront) {
+    errors.licenceFront = 'Licence front image/PDF is required';
+  }
+
+  if (!data.licenceBack) {
+    errors.licenceBack = 'Licence back image/PDF is required';
   }
 
   return errors;
@@ -177,6 +252,14 @@ export const validateStep3 = (data) => {
 
   if (!validateName(data.occupation)) {
     errors.occupation = 'Occupation is required';
+  }
+
+  if (!data.yearsAtEmployment || parseInt(data.yearsAtEmployment) < 0) {
+    errors.yearsAtEmployment = 'Years must be a valid number';
+  }
+
+  if (!data.monthsAtEmployment || parseInt(data.monthsAtEmployment) < 0 || parseInt(data.monthsAtEmployment) > 11) {
+    errors.monthsAtEmployment = 'Months must be between 0-11';
   }
 
   return errors;

@@ -15,20 +15,38 @@ export function SuccessModal({ isOpen, onClose, message }) {
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="relative bg-gradient-to-br from-green-900 to-green-800 border border-green-600/50 rounded-2xl p-8 md:p-12 shadow-2xl shadow-green-500/30 max-w-md mx-4 animate-bounce-in">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="flex size-12 items-center justify-center rounded-full bg-green-500/20 text-green-400">
-            <span className="material-symbols-outlined text-2xl">check_circle</span>
+      <div className="relative bg-white rounded-2xl p-8 md:p-12 shadow-2xl max-w-md mx-4 overflow-hidden">
+        {/* Top accent bar */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary to-primary/70"></div>
+        
+        <div className="flex flex-col items-center text-center">
+          <div className="flex size-16 items-center justify-center rounded-full mb-6" style={{ backgroundColor: '#002470', color: '#D4AF37' }}>
+            <span className="material-symbols-outlined text-4xl">check_circle</span>
           </div>
-          <h2 className="text-2xl font-black text-white">Success!</h2>
+          <h2 className="text-3xl font-black text-black mb-3">Success!</h2>
+          <p className="text-sm text-gray-600 leading-relaxed mb-8">{message || 'Your finance application has been submitted successfully. We will review it shortly.'}</p>
+          
+          <div className="w-full space-y-3">
+            <div className="flex items-center gap-3 text-sm text-gray-700">
+              <span className="material-symbols-outlined text-primary text-lg">verified_user</span>
+              <span>Application received and verified</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-gray-700">
+              <span className="material-symbols-outlined text-primary text-lg">schedule</span>
+              <span>We'll review your application within 24 hours</span>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="mt-8 w-full h-12 rounded-lg font-bold uppercase tracking-wide transition-all active:scale-95 text-white"
+            style={{ backgroundColor: '#002470' }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#001a52'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#002470'}
+          >
+            Close
+          </button>
         </div>
-        <p className="text-sm text-green-100 leading-relaxed">{message || 'Your finance application has been submitted successfully. We will review it shortly.'}</p>
-        <button
-          onClick={onClose}
-          className="mt-6 w-full h-10 rounded-lg bg-green-500 text-white font-bold uppercase tracking-wide transition-all hover:bg-green-600 active:scale-95"
-        >
-          Close
-        </button>
       </div>
     </div>
   );
@@ -46,8 +64,8 @@ export function ErrorModal({ isOpen, onClose, message, errors }) {
   if (!isOpen) return null;
 
   const errorList = Object.entries(displayErrors).map(([key, value]) => (
-    <div key={key} className="text-sm text-red-200 py-1 flex items-start gap-2">
-      <span className="text-primary font-bold mt-0.5">•</span>
+    <div key={key} className="text-sm text-gray-700 py-2 flex items-start gap-3 border-b border-red-100 last:border-b-0">
+      <span className="text-red-500 font-bold mt-0.5 flex-shrink-0">✕</span>
       <span>{value}</span>
     </div>
   ));
@@ -55,24 +73,29 @@ export function ErrorModal({ isOpen, onClose, message, errors }) {
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="relative bg-gradient-to-br from-card-dark to-background-dark border border-primary/30 rounded-2xl p-2 md:p-12 shadow-2xl shadow-primary/20 max-w-md mx-4 max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="flex size-12 items-center justify-center rounded-full bg-primary/20 text-primary border border-primary/50">
-            <span className="material-symbols-outlined text-2xl">error</span>
+      <div className="relative bg-white rounded-2xl p-8 md:p-12 shadow-2xl max-w-md mx-4 max-h-[80vh] overflow-y-auto">
+        {/* Top accent bar - red for error */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-red-600 to-red-500"></div>
+
+        <div className="flex items-center gap-4 mb-6">
+          <div className="flex size-14 items-center justify-center rounded-full bg-red-50 text-red-500 flex-shrink-0">
+            <span className="material-symbols-outlined text-3xl">error</span>
           </div>
-          <h2 className="text-2xl font-black text-primary">Validation Error</h2>
+          <h2 className="text-2xl font-black text-gray-900">Oops!</h2>
         </div>
+
         <div className="mb-6">
-          {message && <p className="text-sm text-text-light leading-relaxed mb-4">{message}</p>}
+          {message && <p className="text-sm text-gray-600 leading-relaxed mb-6 font-semibold">{message}</p>}
           {errorList.length > 0 && (
-            <div className="bg-primary/10 border border-primary/30 rounded-lg p-4">
+            <div className="bg-red-50 rounded-lg p-4 space-y-2">
               {errorList}
             </div>
           )}
         </div>
+
         <button
           onClick={onClose}
-          className="w-full h-10 rounded-lg bg-primary text-black font-bold uppercase tracking-wide transition-all hover:bg-primary-hover active:scale-95 shadow-[0_0_12px_rgba(212,175,55,0.3)]"
+          className="w-full h-12 rounded-lg bg-red-500 text-white font-bold uppercase tracking-wide transition-all hover:bg-red-600 active:scale-95 shadow-md"
         >
           Try Again
         </button>
@@ -87,13 +110,21 @@ export function LoadingModal({ isOpen, message = 'Submitting application...' }) 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-      <div className="relative bg-card-dark border border-border-grey rounded-2xl p-8 md:p-12 shadow-2xl shadow-black/50 max-w-md mx-4">
+      <div className="relative bg-white rounded-2xl p-8 md:p-12 shadow-2xl max-w-md mx-4">
+        {/* Top accent bar */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary to-primary/70"></div>
+
         <div className="flex flex-col items-center gap-6">
-          <div className="flex size-16 items-center justify-center rounded-full bg-primary/20 text-primary animate-spin">
+          <div className="flex size-16 items-center justify-center rounded-full animate-spin" style={{ backgroundColor: '#002470', color: '#D4AF37' }}>
             <span className="material-symbols-outlined text-3xl">hourglass_top</span>
           </div>
           <div className="text-center">
-            <p className="text-sm text-text-muted">{message}</p>
+            <p className="text-sm font-semibold text-gray-700">{message}</p>
+            <div className="flex justify-center gap-1 mt-4">
+              <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{animationDelay: '0s'}}></div>
+              <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{animationDelay: '0.4s'}}></div>
+            </div>
           </div>
         </div>
       </div>
