@@ -17,7 +17,19 @@ export function SuccessModal({ isOpen, onClose, message }) {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
       <div className="relative bg-white rounded-2xl p-8 md:p-12 shadow-2xl max-w-md mx-4 overflow-hidden">
         {/* Top accent bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary to-primary/70"></div>
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary to-primary/70 rounded-2xl"></div>
+        
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 flex items-center justify-center size-8 rounded-lg text-white transition-colors"
+          style={{ backgroundColor: '#002470' }}
+          onMouseEnter={(e) => e.target.style.backgroundColor = '#001a52'}
+          onMouseLeave={(e) => e.target.style.backgroundColor = '#002470'}
+          aria-label="Close modal"
+        >
+          <span className="material-symbols-outlined text-lg">close</span>
+        </button>
         
         <div className="flex flex-col items-center text-center">
           <div className="flex size-16 items-center justify-center rounded-full mb-6" style={{ backgroundColor: '#002470', color: '#D4AF37' }}>
@@ -77,6 +89,18 @@ export function ErrorModal({ isOpen, onClose, message, errors }) {
         {/* Top accent bar - red for error */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-red-600 to-red-500"></div>
 
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 flex items-center justify-center size-8 rounded-lg text-white transition-colors"
+          style={{ backgroundColor: '#D62828' }}
+          onMouseEnter={(e) => e.target.style.backgroundColor = '#b01e1e'}
+          onMouseLeave={(e) => e.target.style.backgroundColor = '#D62828'}
+          aria-label="Close modal"
+        >
+          <span className="material-symbols-outlined text-lg">close</span>
+        </button>
+
         <div className="flex items-center gap-4 mb-6">
           <div className="flex size-14 items-center justify-center rounded-full bg-red-50 text-red-500 flex-shrink-0">
             <span className="material-symbols-outlined text-3xl">error</span>
@@ -110,9 +134,19 @@ export function LoadingModal({ isOpen, message = 'Submitting application...' }) 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-      <div className="relative bg-white rounded-2xl p-8 md:p-12 shadow-2xl max-w-md mx-4">
+      <div className="relative bg-white rounded-2xl p-8 md:p-12 shadow-2xl max-w-md mx-4 overflow-hidden">
         {/* Top accent bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary to-primary/70"></div>
+        <div className="absolute  rounded-2xl top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary to-primary/70"></div>
+
+        {/* Close button */}
+        <button
+          disabled
+          className="absolute top-4 right-4 flex items-center justify-center size-8 rounded-lg text-white cursor-not-allowed opacity-50"
+          style={{ backgroundColor: '#002470' }}
+          aria-label="Loading"
+        >
+          <span className="material-symbols-outlined text-lg">close</span>
+        </button>
 
         <div className="flex flex-col items-center gap-6">
           <div className="flex size-16 items-center justify-center rounded-full animate-spin" style={{ backgroundColor: '#002470', color: '#D4AF37' }}>

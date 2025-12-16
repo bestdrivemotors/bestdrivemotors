@@ -13,7 +13,7 @@ export default function PrivacyPage() {
                 <span className="material-symbols-outlined text-sm">privacy_tip</span>
                 Legal & Privacy
               </div>
-              <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight text-white lg:text-5xl">
+              <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight text-black lg:text-5xl">
                 Privacy Act Statement
               </h1>
               <p className="mt-4 text-base md:text-lg text-text-muted font-light">
@@ -23,12 +23,12 @@ export default function PrivacyPage() {
           </div>
 
           {/* Privacy Statement Content */}
-          <div className="rounded-2xl border border-border-grey bg-card-dark p-8 md:p-10 shadow-2xl shadow-black/50 space-y-8">
+          <div className="bg-background-dark">
             {/* Section 1: The Privacy Act 2020 */}
             <section>
-              <h2 className="text-2xl font-bold text-white mb-6">
+              {/* <h2 className="text-2xl font-bold text-black mb-6">
                 Privacy Act Statement
-              </h2>
+              </h2> */}
               <div className="space-y-4 text-text-muted leading-relaxed">
                 <p>
                   I/we authorise Best Drive Motors<span className="text-primary">*</span> to collect, retain and use the personal information about me/us, for the purposes of:

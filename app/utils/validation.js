@@ -28,6 +28,24 @@ export const validateFileUpload = (file) => {
   return file.size <= maxSize && allowedTypes.includes(file.type);
 };
 
+export const getFileUploadError = (file) => {
+  if (!file) return null;
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  const allowedTypes = [
+    'image/jpeg', 'image/png', 'application/pdf', 'image/svg+xml',
+    'image/webp', 'image/gif', 'image/tiff',
+  ];
+  
+  if (file.size > maxSize) {
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+    return `File size ${sizeMB}MB exceeds 5MB limit`;
+  }
+  if (!allowedTypes.includes(file.type)) {
+    return 'Invalid file type. Please upload JPG, JPEG, PNG, PDF, SVG, WebP, GIF, or TIFF';
+  }
+  return null;
+};
+
 export const validateDriversLicenceNumber = (licenceNumber) => {
   // NZ driver's license numbers are typically AA000000 format
   const licenceRegex = /^[A-Z]{2}\d{6}$/;
@@ -35,9 +53,10 @@ export const validateDriversLicenceNumber = (licenceNumber) => {
 };
 
 export const validateVersionNumber = (version) => {
-  // Version number should be 1-3 digits
-  const versionRegex = /^\d{1,3}$/;
-  return versionRegex.test(version.trim());
+  // Version number should be 1-3 digits (1-999)
+  if (!version || version === '') return false;
+  const num = parseInt(version, 10);
+  return !isNaN(num) && num >= 1 && num <= 999;
 };
 
 export const validateDateNotInPast = (date) => {
@@ -64,9 +83,10 @@ export const validateDateOfBirth = (date) => {
 };
 
 export const validatePostcode = (postcode) => {
-  // NZ postcodes are 4 digits
-  const postcodeRegex = /^\d{4}$/;
-  return postcodeRegex.test(postcode.trim());
+  // NZ postcodes are exactly 4 digits (1000-9999)
+  if (!postcode || postcode === '') return false;
+  const num = parseInt(postcode, 10);
+  return !isNaN(num) && num >= 1000 && num <= 9999;
 };
 
 export const validateAddress = (address) => {
@@ -114,6 +134,26 @@ export const combineDateFromParts = (day, month, year) => {
 };
 
 export const validateDateOfBirthFromParts = (day, month, year) => {
+  const dayNum = parseInt(day, 10);
+  const monthNum = parseInt(month, 10);
+  const yearNum = parseInt(year, 10);
+  
+  // Validate day (1-31)
+  if (!day || isNaN(dayNum) || dayNum < 1 || dayNum > 31) {
+    return false;
+  }
+  
+  // Validate month (1-12)
+  if (!month || isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+    return false;
+  }
+  
+  // Validate year (reasonable range)
+  const currentYear = new Date().getFullYear();
+  if (!year || isNaN(yearNum) || yearNum < (currentYear - 120) || yearNum > (currentYear - 16)) {
+    return false;
+  }
+  
   const dateStr = combineDateFromParts(day, month, year);
   if (!dateStr) return false;
   
@@ -167,7 +207,7 @@ export const validateStep1 = (data) => {
   }
 
   if (!validateDateOfBirthFromParts(data.dateOfBirthDay, data.dateOfBirthMonth, data.dateOfBirthYear)) {
-    errors.dateOfBirth = 'You must be between 16 and 120 years old';
+    errors.dateOfBirth = 'Please enter a valid date of birth (day 1-31, month 1-12, and you must be 16-120 years old)';
   }
 
   if (!data.driverLicenceType) {

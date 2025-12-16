@@ -4,9 +4,12 @@ export default function FinanceSection() {
       <div className="absolute inset-0 z-0">
         <img
           alt="Background"
-          className="h-full w-full object-cover opacity-10"
+          className="h-full w-full object-cover"
+          style={{ opacity: 0.1 }}
           src="/finance-bg.jpg"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/120 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black-dark via-black/20 to-transparent"></div>
       </div>
       <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-12 lg:px-20 text-center">
         <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white">

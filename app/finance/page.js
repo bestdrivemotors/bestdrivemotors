@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { validateStep1, validateStep2, validateStep3, validateStep4 } from '@/app/utils/validation';
+import { validateStep1, validateStep2, validateStep3, validateStep4, getFileUploadError } from '@/app/utils/validation';
 import { SuccessModal, ErrorModal, LoadingModal } from '@/app/components/FormModals';
 
 const STORAGE_KEY = 'finance_form_data';
@@ -79,16 +79,97 @@ export default function FinancePage() {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked, files } = e.target;
+    const file = type === 'file' ? (files ? files[0] : null) : null;
+    
+    let newValue = value;
+    
+    // Validate and constrain date day fields (1-31)
+    if ((name === 'dateOfBirthDay' || name === 'licenceExpiryDay') && type === 'number') {
+      const numValue = parseInt(value, 10);
+      if (value && !isNaN(numValue)) {
+        if (numValue > 31) {
+          newValue = '31';
+        } else if (numValue < 0) {
+          newValue = '';
+        }
+      }
+    }
+    
+    // Validate and constrain date month fields (1-12)
+    if ((name === 'dateOfBirthMonth' || name === 'licenceExpiryMonth') && type === 'number') {
+      const numValue = parseInt(value, 10);
+      if (value && !isNaN(numValue)) {
+        if (numValue > 12) {
+          newValue = '12';
+        } else if (numValue < 0) {
+          newValue = '';
+        }
+      }
+    }
+    
+    // Validate and constrain postcode field (max 4 digits)
+    if (name === 'postcode' && type === 'number') {
+      if (value && value.length > 4) {
+        // Keep only the first 4 digits
+        newValue = value.substring(0, 4);
+      }
+    }
+    
+    // Validate and constrain dependents field (0-20, max 2 digits)
+    if (name === 'dependents' && type === 'number') {
+      if (value && value.length > 2) {
+        // Keep only the first 2 digits
+        newValue = value.substring(0, 2);
+      }
+    }
+    
     setFormData((prev) => ({ 
       ...prev, 
-      [name]: type === 'checkbox' ? checked : type === 'file' ? (files ? files[0] : null) : value 
+      [name]: type === 'checkbox' ? checked : type === 'file' ? file : newValue 
     }));
-    if (errorMessages[name]) {
+    
+    // Clear error messages when user starts typing
+    if (type !== 'file' && errorMessages[name]) {
       setErrorMessages((prev) => {
         const updated = { ...prev };
         delete updated[name];
         return updated;
       });
+    }
+    
+    // Clear date-related error messages when editing any date part
+    if ((name === 'dateOfBirthDay' || name === 'dateOfBirthMonth' || name === 'dateOfBirthYear') && errorMessages.dateOfBirth) {
+      setErrorMessages((prev) => {
+        const updated = { ...prev };
+        delete updated.dateOfBirth;
+        return updated;
+      });
+    }
+    
+    if ((name === 'licenceExpiryDay' || name === 'licenceExpiryMonth' || name === 'licenceExpiryYear') && errorMessages.licenceExpiry) {
+      setErrorMessages((prev) => {
+        const updated = { ...prev };
+        delete updated.licenceExpiry;
+        return updated;
+      });
+    }
+    
+    // Validate file upload immediately and set error if invalid
+    if (type === 'file' && file) {
+      const fileError = getFileUploadError(file);
+      if (fileError) {
+        setErrorMessages((prev) => ({ ...prev, [name]: fileError }));
+        // Clear the invalid file
+        setFormData((prev) => ({ ...prev, [name]: null }));
+        // Reset the input
+        e.target.value = '';
+      } else if (errorMessages[name]) {
+        setErrorMessages((prev) => {
+          const updated = { ...prev };
+          delete updated[name];
+          return updated;
+        });
+      }
     }
   };
 
@@ -180,15 +261,17 @@ export default function FinancePage() {
       submitData.append('dateOfBirth', dateOfBirth);
       submitData.append('licenceExpiry', licenceExpiry);
       
-      // Add files with proper naming: firstName_lastName_front and firstName_lastName_back
+      // Add files with proper naming: firstName_lastName_front.ext and firstName_lastName_back.ext
       if (formData.licenceFront) {
-        const frontFileName = `${formData.firstName}_${formData.lastName}_front`;
+        const ext = formData.licenceFront.name.split('.').pop(); // Get file extension
+        const frontFileName = `${formData.firstName}_${formData.lastName}_front.${ext}`;
         const frontFile = new File([formData.licenceFront], frontFileName, { type: formData.licenceFront.type });
         submitData.append('licenceFront', frontFile);
       }
       
       if (formData.licenceBack) {
-        const backFileName = `${formData.firstName}_${formData.lastName}_back`;
+        const ext = formData.licenceBack.name.split('.').pop(); // Get file extension
+        const backFileName = `${formData.firstName}_${formData.lastName}_back.${ext}`;
         const backFile = new File([formData.licenceBack], backFileName, { type: formData.licenceBack.type });
         submitData.append('licenceBack', backFile);
       }
@@ -306,14 +389,14 @@ export default function FinancePage() {
 
               {/* STEP 1 */}
               <section className={`${currentStep !== 1 ? 'hidden' : 'block'} animate-fade-in-slide p-4 sm:p-6 md:p-10`}>
-                <div className="mb-2 flex flex-col gap-4 md:gap-6 border-b-2 border-border-grey pb-4">
-                  <div className="flex flex-row items-start gap-4 md:gap-6">
-                    <div className="flex size-14 md:size-16 items-center justify-center rounded-xl flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
-                      <span className="material-symbols-outlined text-3xl md:text-4xl">person</span>
+                <div className="mb-4 flex flex-col gap-2 md:gap-3 border-b-2 border-border-grey pb-3 md:pb-4">
+                  <div className="flex flex-row items-center gap-3 md:gap-4">
+                    <div className="flex size-10 md:size-12 items-center justify-center rounded-lg flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
+                      <span className="material-symbols-outlined text-xl md:text-2xl">person</span>
                     </div>
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-black leading-tight">Personal Details</h2>
+                    <h2 className="text-lg md:text-2xl lg:text-3xl font-black text-black leading-tight">Personal Details</h2>
                   </div>
-                  <p className="text-sm md:text-base text-text-muted">Please provide your legal identification details.</p>
+                  <p className="text-xs md:text-sm text-text-muted">Please provide your legal identification details.</p>
                 </div>
 
                 <div className="mb-8">
@@ -349,12 +432,25 @@ export default function FinancePage() {
                     <div className="flex flex-col gap-2">
                       <span className="text-xs font-bold uppercase tracking-wider text-text-muted transition-colors">Date of Birth <span className="text-red-500">*</span></span>
                       <div className="flex gap-3 md:gap-4">
-                        <input type="number" name="dateOfBirthDay" value={formData.dateOfBirthDay} onChange={handleInputChange} placeholder="Day" min="1" max="31"
+                        <input type="number" name="dateOfBirthDay" value={formData.dateOfBirthDay} onChange={handleInputChange} placeholder="Day" min="1" max="31" inputMode="numeric"
                           className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                             errorMessages.dateOfBirth ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
-                        <input type="number" name="dateOfBirthMonth" value={formData.dateOfBirthMonth} onChange={handleInputChange} placeholder="Month" min="1" max="12"
-                          className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
-                            errorMessages.dateOfBirth ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                        <select name="dateOfBirthMonth" value={formData.dateOfBirthMonth} onChange={handleInputChange} className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black focus:ring-1 outline-none transition-all ${
+                          errorMessages.dateOfBirth ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`}>
+                          <option value="">Month</option>
+                          <option value="1">January</option>
+                          <option value="2">February</option>
+                          <option value="3">March</option>
+                          <option value="4">April</option>
+                          <option value="5">May</option>
+                          <option value="6">June</option>
+                          <option value="7">July</option>
+                          <option value="8">August</option>
+                          <option value="9">September</option>
+                          <option value="10">October</option>
+                          <option value="11">November</option>
+                          <option value="12">December</option>
+                        </select>
                         <input type="number" name="dateOfBirthYear" value={formData.dateOfBirthYear} onChange={handleInputChange} placeholder="Year" min={new Date().getFullYear() - 120} max={new Date().getFullYear() - 16}
                           className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                             errorMessages.dateOfBirth ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
@@ -428,7 +524,7 @@ export default function FinancePage() {
                     </label>
                     <label className="flex flex-col gap-2 group">
                       <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Version Number <span className="text-red-500">*</span></span>
-                      <input type="text" name="versionNumber" value={formData.versionNumber} onChange={handleInputChange} maxLength="3" placeholder="e.g. 123"
+                      <input type="number" name="versionNumber" value={formData.versionNumber} onChange={handleInputChange} placeholder="e.g. 123" min="1" max="999"
                         className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                           errorMessages.versionNumber ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
                       {errorMessages.versionNumber && <span className="text-xs text-red-400">{errorMessages.versionNumber}</span>}
@@ -436,12 +532,25 @@ export default function FinancePage() {
                     <div className="flex flex-col gap-2">
                       <span className="text-xs font-bold uppercase tracking-wider text-text-muted transition-colors">Licence Expiry <span className="text-red-500">*</span></span>
                       <div className="flex gap-3 md:gap-4">
-                        <input type="number" name="licenceExpiryDay" value={formData.licenceExpiryDay} onChange={handleInputChange} placeholder="Day" min="1" max="31"
+                        <input type="number" name="licenceExpiryDay" value={formData.licenceExpiryDay} onChange={handleInputChange} placeholder="Day" min="1" max="31" inputMode="numeric"
                           className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                             errorMessages.licenceExpiry ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
-                        <input type="number" name="licenceExpiryMonth" value={formData.licenceExpiryMonth} onChange={handleInputChange} placeholder="Month" min="1" max="12"
-                          className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
-                            errorMessages.licenceExpiry ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
+                        <select name="licenceExpiryMonth" value={formData.licenceExpiryMonth} onChange={handleInputChange} className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black focus:ring-1 outline-none transition-all ${
+                          errorMessages.licenceExpiry ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`}>
+                          <option value="">Month</option>
+                          <option value="1">January</option>
+                          <option value="2">February</option>
+                          <option value="3">March</option>
+                          <option value="4">April</option>
+                          <option value="5">May</option>
+                          <option value="6">June</option>
+                          <option value="7">July</option>
+                          <option value="8">August</option>
+                          <option value="9">September</option>
+                          <option value="10">October</option>
+                          <option value="11">November</option>
+                          <option value="12">December</option>
+                        </select>
                         <input type="number" name="licenceExpiryYear" value={formData.licenceExpiryYear} onChange={handleInputChange} placeholder="Year" min={new Date().getFullYear()} max={new Date().getFullYear() + 30}
                           className={`h-12 w-full rounded-lg border bg-input-bg px-3 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                             errorMessages.licenceExpiry ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
@@ -520,14 +629,14 @@ export default function FinancePage() {
 
               {/* STEP 2 */}
               <section className={`${currentStep !== 2 ? 'hidden' : 'block'} animate-fade-in-slide p-4 sm:p-6 md:p-10`}>
-                <div className="mb-2 flex flex-col gap-4 md:gap-6 border-b-2 border-border-grey pb-4">
-                  <div className="flex flex-row items-start gap-4 md:gap-6">
-                    <div className="flex size-14 md:size-16 items-center justify-center rounded-xl flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
-                      <span className="material-symbols-outlined text-3xl md:text-4xl">home</span>
+                <div className="mb-4 flex flex-col gap-2 md:gap-3 border-b-2 border-border-grey pb-3 md:pb-4">
+                  <div className="flex flex-row items-center gap-3 md:gap-4">
+                    <div className="flex size-10 md:size-12 items-center justify-center rounded-lg flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
+                      <span className="material-symbols-outlined text-xl md:text-2xl">home</span>
                     </div>
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-black leading-tight">Residential Information</h2>
+                    <h2 className="text-lg md:text-2xl lg:text-3xl font-black text-black leading-tight">Residential Information</h2>
                   </div>
-                  <p className="text-sm md:text-base text-text-muted">Where are you currently living?</p>
+                  <p className="text-xs md:text-sm text-text-muted">Where are you currently living?</p>
                 </div>
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                   <label className="flex flex-col gap-2 md:col-span-2 group">
@@ -549,7 +658,7 @@ export default function FinancePage() {
                   </label>
                   <label className="flex flex-col gap-2 group">
                     <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Postcode <span className="text-red-500">*</span></span>
-                    <input type="number" name="postcode" value={formData.postcode} onChange={handleInputChange} placeholder="e.g. 2104" maxLength="4"
+                    <input type="number" name="postcode" value={formData.postcode} onChange={handleInputChange} placeholder="e.g. 2104" min="1000" max="9999"
                       className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                         errorMessages.postcode ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
                     {errorMessages.postcode && <span className="text-xs text-red-400">{errorMessages.postcode}</span>}
@@ -592,14 +701,14 @@ export default function FinancePage() {
 
               {/* STEP 3 */}
               <section className={`${currentStep !== 3 ? 'hidden' : 'block'} animate-fade-in-slide p-4 sm:p-6 md:p-10`}>
-                <div className="mb-2 flex flex-col gap-4 md:gap-6 border-b-2 border-border-grey pb-4">
-                  <div className="flex flex-row items-start gap-4 md:gap-6">
-                    <div className="flex size-14 md:size-16 items-center justify-center rounded-xl flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
-                      <span className="material-symbols-outlined text-3xl md:text-4xl">work</span>
+                <div className="mb-4 flex flex-col gap-2 md:gap-3 border-b-2 border-border-grey pb-3 md:pb-4">
+                  <div className="flex flex-row items-center gap-3 md:gap-4">
+                    <div className="flex size-10 md:size-12 items-center justify-center rounded-lg flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
+                      <span className="material-symbols-outlined text-xl md:text-2xl">work</span>
                     </div>
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-black leading-tight">Employment Details</h2>
+                    <h2 className="text-lg md:text-2xl lg:text-3xl font-black text-black leading-tight">Employment Details</h2>
                   </div>
-                  <p className="text-sm md:text-base text-text-muted">Tell us about your current employment.</p>
+                  <p className="text-xs md:text-sm text-text-muted">Tell us about your current employment.</p>
                 </div>
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                   <label className="flex flex-col gap-2 group">
@@ -658,14 +767,14 @@ export default function FinancePage() {
 
               {/* STEP 4 */}
               <section className={`${currentStep !== 4 ? 'hidden' : 'block'} animate-fade-in-slide p-4 sm:p-6 md:p-10`}>
-                <div className="mb-2 flex flex-col gap-4 md:gap-6 border-b-2 border-border-grey pb-4">
-                  <div className="flex flex-row items-start gap-4 md:gap-6">
-                    <div className="flex size-14 md:size-16 items-center justify-center rounded-xl flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
-                      <span className="material-symbols-outlined text-3xl md:text-4xl">payments</span>
+                <div className="mb-4 flex flex-col gap-2 md:gap-3 border-b-2 border-border-grey pb-3 md:pb-4">
+                  <div className="flex flex-row items-center gap-3 md:gap-4">
+                    <div className="flex size-10 md:size-12 items-center justify-center rounded-lg flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
+                      <span className="material-symbols-outlined text-xl md:text-2xl">payments</span>
                     </div>
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-black leading-tight">Financial Information</h2>
+                    <h2 className="text-lg md:text-2xl lg:text-3xl font-black text-black leading-tight">Financial Information</h2>
                   </div>
-                  <p className="text-sm md:text-base text-text-muted">Your income and expense details help us assess affordability.</p>
+                  <p className="text-xs md:text-sm text-text-muted">Your income and expense details help us assess affordability.</p>
                 </div>
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                   <label className="flex flex-col gap-2 group">
@@ -679,17 +788,19 @@ export default function FinancePage() {
                     {errorMessages.income && <span className="text-xs text-red-400">{errorMessages.income}</span>}
                   </label>
                   <label className="flex flex-col gap-2 group">
-                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Pay Frequency</span>
-                    <select name="payFrequency" value={formData.payFrequency} onChange={handleInputChange} className="h-12 w-full rounded-lg border border-border-grey bg-input-bg px-4 text-black focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                    <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Pay Frequency <span className="text-red-500">*</span></span>
+                    <select name="payFrequency" value={formData.payFrequency} onChange={handleInputChange} className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black focus:ring-1 outline-none transition-all ${
+                      errorMessages.payFrequency ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`}>
                       <option value="">Select Pay Frequency</option>
                       <option value="weekly">Weekly</option>
                       <option value="fortnightly">Fortnightly</option>
                       <option value="monthly">Monthly</option>
                     </select>
+                    {errorMessages.payFrequency && <span className="text-xs text-red-400">{errorMessages.payFrequency}</span>}
                   </label>
                   <label className="flex flex-col gap-2 group">
                     <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Dependents <span className="text-red-500">*</span></span>
-                    <input type="number" name="dependents" value={formData.dependents} onChange={handleInputChange} placeholder="0" max="20"
+                    <input type="number" name="dependents" value={formData.dependents} onChange={handleInputChange} placeholder="0" min="0" max="20" inputMode="numeric"
                       className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                         errorMessages.dependents ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
                     {errorMessages.dependents && <span className="text-xs text-red-400">{errorMessages.dependents}</span>}
