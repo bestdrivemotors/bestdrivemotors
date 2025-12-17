@@ -1,5 +1,7 @@
 'use client';
 
+import { MdPrivacyTip } from 'react-icons/md';
+
 export default function PrivacyPage() {
 
   return (
@@ -10,7 +12,7 @@ export default function PrivacyPage() {
           <div className="mb-12 flex flex-col gap-6">
             <div>
               <div className="mb-3 flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs">
-                <span className="material-symbols-outlined text-sm">privacy_tip</span>
+                <MdPrivacyTip className="text-sm" />
                 Legal & Privacy
               </div>
               <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight text-black lg:text-5xl">

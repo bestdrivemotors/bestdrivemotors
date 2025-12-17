@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { MdDirectionsCar, MdHome } from 'react-icons/md';
 
 export default function NotFound() {
   return (
@@ -16,9 +17,7 @@ export default function NotFound() {
         <div className="mb-6 md:mb-8 flex justify-center">
           <div className="relative">
             <div className="w-24 md:w-32 h-24 md:h-32 rounded-full bg-gradient-to-br from-primary/20 to-red-500/20 flex items-center justify-center">
-              <span className="material-symbols-outlined text-6xl md:text-8xl text-primary animate-pulse">
-                directions_car
-              </span>
+              <MdDirectionsCar className="text-6xl md:text-8xl text-primary animate-pulse" />
             </div>
             <div className="absolute top-0 right-0 w-10 md:w-12 h-10 md:h-12 bg-red-500/30 rounded-full animate-bounce"></div>
           </div>
@@ -53,14 +52,14 @@ export default function NotFound() {
             href="/"
             className="flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-primary hover:bg-primary-hover text-white font-bold uppercase tracking-wide rounded-lg transition-all hover:scale-[1.02] shadow-[0_4px_20px_rgba(212,175,55,0.3)] hover:shadow-[0_6px_30px_rgba(212,175,55,0.5)] text-sm md:text-base w-full md:w-auto"
           >
-            <span className="material-symbols-outlined">home</span>
+            <MdHome />
             Back to Home
           </Link>
           <Link
             href="/finance"
             className="flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-card-dark hover:bg-card-dark/80 text-white font-bold uppercase tracking-wide rounded-lg transition-all hover:scale-[1.02] border border-primary/30 hover:border-primary text-sm md:text-base w-full md:w-auto"
           >
-            <span className="material-symbols-outlined">directions_car</span>
+            <MdDirectionsCar />
             Finance Application
           </Link>
         </div>

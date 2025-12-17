@@ -1,3 +1,7 @@
+'use client';
+
+import { MdArrowForward } from 'react-icons/md';
+
 export default function FinanceSection() {
   return (
     <section className="relative py-16 md:py-24 overflow-hidden" id="finance">
@@ -25,7 +29,7 @@ export default function FinanceSection() {
             href="/finance"
           >
             Start Application
-            <span className="material-symbols-outlined text-lg">arrow_forward</span>
+            <MdArrowForward className="text-lg" />
           </a>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { MdArrowForward } from 'react-icons/md';
 
 export default function Hero() {
   return (
@@ -33,7 +34,7 @@ export default function Hero() {
               className="flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-bold text-white shadow-[0_0_20px_rgba(212,175,55,0.2)] transition-all hover:bg-primary-hover hover:-translate-y-1"
             >
               View Stock
-              <span className="material-symbols-outlined text-lg">arrow_forward</span>
+              <MdArrowForward className="text-lg" />
             </Link>
             <Link
               href="/finance"

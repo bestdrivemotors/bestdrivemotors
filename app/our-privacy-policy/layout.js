@@ -8,7 +8,7 @@ export const metadata = {
   openGraph: {
     title: "Privacy Policy | Best Drive Motors",
     description: "Privacy Act Statement and information protection policy",
-    url: "https://bestdrivemotors.co.nz/privacy",
+    url: "https://bestdrivemotors.co.nz/our-privacy-policy",
   },
 };
 

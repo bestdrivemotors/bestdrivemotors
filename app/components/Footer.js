@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { MdCall, MdMail } from 'react-icons/md';
 
 export default function Footer() {
   return (
@@ -54,17 +57,13 @@ export default function Footer() {
               </span>
             </li> */}
             <li className="flex items-center gap-3 group">
-              <span className="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform">
-                call
-              </span>
+              <MdCall className="text-primary text-xl group-hover:scale-110 transition-transform" />
               <a className="hover:text-primary transition-colors" href="tel:0800BESTDRIVE">
                 022 435 3449
               </a>
             </li>
             <li className="flex items-center gap-3 group">
-              <span className="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform">
-                mail
-              </span>
+              <MdMail className="text-primary text-xl group-hover:scale-110 transition-transform" />
               <a
                 className="hover:text-primary transition-colors"
                 href="mailto:bestdrivemotors@outlook.co.nz"

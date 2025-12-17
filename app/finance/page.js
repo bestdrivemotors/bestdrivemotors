@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { validateStep1, validateStep2, validateStep3, validateStep4, getFileUploadError } from '@/app/utils/validation';
 import { SuccessModal, ErrorModal, LoadingModal } from '@/app/components/FormModals';
+import { MdVerifiedUser, MdCheck, MdPerson, MdMail, MdSmartphone, MdCheckCircle, MdCloudUpload, MdError, MdArrowForward, MdHome, MdSearch, MdArrowBack, MdWork, MdPayment, MdLock } from 'react-icons/md';
 
 const STORAGE_KEY = 'finance_form_data';
 const COMPLETED_STEPS_KEY = 'finance_form_completed_steps';
@@ -343,7 +344,7 @@ export default function FinancePage() {
           <div className="mb-4 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <div className="mb-3 flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs">
-                <span className="material-symbols-outlined text-sm">verified_user</span>
+                <MdVerifiedUser className="text-sm" />
                 Secure Finance Application
               </div>
               <h1 className="text-2xl font-black leading-tight tracking-tight text-black">Quick Finance Application</h1>
@@ -364,8 +365,10 @@ export default function FinancePage() {
                 {[1, 2, 3, 4].map((step) => {
                   const status = getStepStatus(step);
                   const stepLabels = ['Personal', 'Residential', 'Employment', 'Financial'];
-                  const stepIcons = ['person', 'home', 'work', 'payments'];
+                  const stepIconsMap = { 'person': MdPerson, 'home': MdHome, 'work': MdWork, 'payments': MdPayment };
                   const isAccessible = canAccessStep(step);
+                  const stepIconName = ['person', 'home', 'work', 'payments'][step - 1];
+                  const StepIcon = stepIconsMap[stepIconName];
                   return (
                     <button key={step} type="button" onClick={() => isAccessible && handleStepChange(step)} disabled={!isAccessible}
                       className={`relative flex flex-col items-center justify-center py-4 transition-all duration-300 cursor-pointer group
@@ -378,8 +381,8 @@ export default function FinancePage() {
                             status === 'completed' ? 'border-primary bg-primary/20 text-primary' :
                             status === 'disabled' ? 'border-border-grey bg-background-dark text-text-muted' :
                             'border-border-grey bg-card-dark text-text-muted hover:border-primary'}`}>
-                          {status === 'completed' ? <span className="material-symbols-outlined text-sm">check</span> :
-                            <span className="material-symbols-outlined text-sm">{stepIcons[step - 1]}</span>}
+                          {status === 'completed' ? <MdCheck className="text-sm" /> :
+                            <StepIcon className="text-sm" />}
                         </div>
                         <span className="hidden md:block text-xs font-bold uppercase tracking-wider transition-colors duration-300"
                           style={{ color: status === 'active' ? '#FFFFFF' : status === 'completed' ? '#D62828' :
@@ -408,7 +411,7 @@ export default function FinancePage() {
                 <div className="mb-4 flex flex-col gap-2 md:gap-3 border-b-2 border-border-grey pb-3 md:pb-4">
                   <div className="flex flex-row items-center gap-3 md:gap-4">
                     <div className="flex size-10 md:size-12 items-center justify-center rounded-lg flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
-                      <span className="material-symbols-outlined text-xl md:text-2xl">person</span>
+                      <MdPerson className="text-xl md:text-2xl" />
                     </div>
                     <h2 className="text-lg md:text-2xl lg:text-3xl font-black text-black leading-tight">Personal Details</h2>
                   </div>
@@ -495,7 +498,7 @@ export default function FinancePage() {
                     <label className="flex flex-col gap-2 group">
                       <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Email Address <span className="text-red-500">*</span></span>
                       <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">mail</span>
+                        <MdMail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" />
                         <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="john.doe@example.com"
                           className={`h-12 w-full rounded-lg border bg-input-bg pl-12 pr-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                             errorMessages.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
@@ -505,7 +508,7 @@ export default function FinancePage() {
                     <label className="flex flex-col gap-2 group">
                       <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Mobile Phone <span className="text-red-500">*</span></span>
                       <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">smartphone</span>
+                        <MdSmartphone className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" />
                         <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="021 123 4567"
                           className={`h-12 w-full rounded-lg border bg-input-bg pl-12 pr-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                             errorMessages.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
@@ -591,20 +594,20 @@ export default function FinancePage() {
                         <div className="flex flex-col items-center gap-3 pointer-events-none">
                           {formData.licenceFront ? (
                             <>
-                              <span className="material-symbols-outlined text-3xl" style={{ color: '#002470' }}>check_circle</span>
+                              <MdCheckCircle className="text-3xl" style={{ color: '#002470' }} />
                               <span className="text-sm font-semibold text-center break-all" style={{ color: '#002470' }}>{formData.licenceFront.name}</span>
                               <span className="text-xs text-text-muted">Click to replace</span>
                             </>
                           ) : (
                             <>
-                              <span className="material-symbols-outlined text-3xl text-text-muted group-hover:text-primary transition-colors">cloud_upload</span>
+                              <MdCloudUpload className="text-3xl text-text-muted group-hover:text-primary transition-colors" />
                               <span className="text-sm font-semibold text-text-muted group-hover:text-primary transition-colors">Click to upload or drag</span>
                               <span className="text-xs text-text-muted">JPG, JPEG, PNG, PDF, SVG, WebP, GIF, TIFF (max 2MB)</span>
                             </>
                           )}
                         </div>
                       </div>
-                      {errorMessages.licenceFront && <span className="text-xs text-red-400 flex items-center gap-1"><span className="material-symbols-outlined text-sm">error</span>{errorMessages.licenceFront}</span>}
+                      {errorMessages.licenceFront && <span className="text-xs text-red-400 flex items-center gap-1"><MdError className="text-sm" />{errorMessages.licenceFront}</span>}
                     </label>
 
                     <label className="flex flex-col gap-4 group cursor-pointer">
@@ -618,27 +621,27 @@ export default function FinancePage() {
                         <div className="flex flex-col items-center gap-3 pointer-events-none">
                           {formData.licenceBack ? (
                             <>
-                              <span className="material-symbols-outlined text-3xl" style={{ color: '#002470' }}>check_circle</span>
+                              <MdCheckCircle className="text-3xl" style={{ color: '#002470' }} />
                               <span className="text-sm font-semibold text-center break-all" style={{ color: '#002470' }}>{formData.licenceBack.name}</span>
                               <span className="text-xs text-text-muted">Click to replace</span>
                             </>
                           ) : (
                             <>
-                              <span className="material-symbols-outlined text-3xl text-text-muted group-hover:text-primary transition-colors">cloud_upload</span>
+                              <MdCloudUpload className="text-3xl text-text-muted group-hover:text-primary transition-colors" />
                               <span className="text-sm font-semibold text-text-muted group-hover:text-primary transition-colors">Click to upload or drag</span>
                               <span className="text-xs text-text-muted">JPG, JPEG, PNG, PDF, SVG, WebP, GIF, TIFF (max 2MB)</span>
                             </>
                           )}
                         </div>
                       </div>
-                      {errorMessages.licenceBack && <span className="text-xs text-red-400 flex items-center gap-1"><span className="material-symbols-outlined text-sm">error</span>{errorMessages.licenceBack}</span>}
+                      {errorMessages.licenceBack && <span className="text-xs text-red-400 flex items-center gap-1"><MdError className="text-sm" />{errorMessages.licenceBack}</span>}
                     </label>
                   </div>
                 </div>
 
                 <div className="mt-10 flex justify-end border-t border-border-grey pt-8">
                   <button type="button" onClick={handleNextStep} className="cursor-pointer flex h-12 items-center justify-center gap-3 rounded-lg bg-primary px-8 text-sm font-bold uppercase tracking-wide text-white transition-all hover:bg-primary-hover hover:scale-[1.02] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
-                    Next Step <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                    Next Step <MdArrowForward className="text-lg" />
                   </button>
                 </div>
               </section>
@@ -648,7 +651,7 @@ export default function FinancePage() {
                 <div className="mb-4 flex flex-col gap-2 md:gap-3 border-b-2 border-border-grey pb-3 md:pb-4">
                   <div className="flex flex-row items-center gap-3 md:gap-4">
                     <div className="flex size-10 md:size-12 items-center justify-center rounded-lg flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
-                      <span className="material-symbols-outlined text-xl md:text-2xl">home</span>
+                      <MdHome className="text-xl md:text-2xl" />
                     </div>
                     <h2 className="text-lg md:text-2xl lg:text-3xl font-black text-black leading-tight">Residential Information</h2>
                   </div>
@@ -658,7 +661,7 @@ export default function FinancePage() {
                   <label className="flex flex-col gap-2 md:col-span-2 group">
                     <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Current Address <span className="text-red-500">*</span></span>
                     <div className="relative">
-                      <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">search</span>
+                      <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" />
                       <input type="text" name="currentAddress" value={formData.currentAddress} onChange={handleInputChange} placeholder="Start typing your address..."
                         className={`h-12 w-full rounded-lg border bg-input-bg pl-12 pr-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                           errorMessages.currentAddress ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
@@ -707,10 +710,10 @@ export default function FinancePage() {
                 </div>
                 <div className="mt-10 flex justify-between border-t border-border-grey pt-8 gap-4">
                   <button type="button" onClick={handlePreviousStep} className="cursor-pointer flex h-12 items-center justify-center gap-2 rounded-lg border border-border-grey bg-transparent px-8 text-sm font-bold uppercase tracking-wide text-text-muted transition-all hover:bg-white/5 hover:text-black ">
-                    <span className="material-symbols-outlined text-lg">arrow_back</span> Back
+                    <MdArrowBack className="text-lg" /> Back
                   </button>
                   <button type="button" onClick={handleNextStep} className="cursor-pointer flex h-12 items-center justify-center gap-3 rounded-lg bg-primary px-8 text-sm font-bold uppercase tracking-wide text-white transition-all hover:bg-primary-hover hover:scale-[1.02] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
-                    Next Step <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                    Next Step <MdArrowForward className="text-lg" />
                   </button>
                 </div>
               </section>
@@ -720,7 +723,7 @@ export default function FinancePage() {
                 <div className="mb-4 flex flex-col gap-2 md:gap-3 border-b-2 border-border-grey pb-3 md:pb-4">
                   <div className="flex flex-row items-center gap-3 md:gap-4">
                     <div className="flex size-10 md:size-12 items-center justify-center rounded-lg flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
-                      <span className="material-symbols-outlined text-xl md:text-2xl">work</span>
+                      <MdWork className="text-xl md:text-2xl" />
                     </div>
                     <h2 className="text-lg md:text-2xl lg:text-3xl font-black text-black leading-tight">Employment Details</h2>
                   </div>
@@ -773,10 +776,10 @@ export default function FinancePage() {
                   </div>
                 <div className="mt-10 flex justify-between border-t border-border-grey pt-8 gap-4">
                   <button type="button" onClick={handlePreviousStep} className="cursor-pointer flex h-12 items-center justify-center gap-2 rounded-lg border border-border-grey bg-transparent px-8 text-sm font-bold uppercase tracking-wide text-text-muted transition-all hover:bg-white/5 hover:text-black ">
-                    <span className="material-symbols-outlined text-lg">arrow_back</span> Back
+                    <MdArrowBack className="text-lg" /> Back
                   </button>
                   <button type="button" onClick={handleNextStep} className="cursor-pointer flex h-12 items-center justify-center gap-3 rounded-lg bg-primary px-8 text-sm font-bold uppercase tracking-wide text-white transition-all hover:bg-primary-hover hover:scale-[1.02] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
-                    Next Step <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                    Next Step <MdArrowForward className="text-lg" />
                   </button>
                 </div>
               </section>
@@ -786,7 +789,7 @@ export default function FinancePage() {
                 <div className="mb-4 flex flex-col gap-2 md:gap-3 border-b-2 border-border-grey pb-3 md:pb-4">
                   <div className="flex flex-row items-center gap-3 md:gap-4">
                     <div className="flex size-10 md:size-12 items-center justify-center rounded-lg flex-shrink-0" style={{ backgroundColor: '#002470', color: '#ffffff' }}>
-                      <span className="material-symbols-outlined text-xl md:text-2xl">payments</span>
+                      <MdPayment className="text-xl md:text-2xl" />
                     </div>
                     <h2 className="text-lg md:text-2xl lg:text-3xl font-black text-black leading-tight">Financial Information</h2>
                   </div>
@@ -851,7 +854,7 @@ export default function FinancePage() {
                     <div className="relative flex items-center mt-0.5">
                       <input type="checkbox" name="termsConsent" checked={formData.termsConsent} onChange={handleInputChange}
                         className="peer h-6 w-6 cursor-pointer appearance-none rounded border border-border-grey bg-background-dark checked:bg-primary checked:border-primary transition-all" />
-                      <span className="material-symbols-outlined absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-black opacity-0 peer-checked:opacity-100 text-lg pointer-events-none font-bold">check</span>
+                      <MdCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-black opacity-0 peer-checked:opacity-100 text-lg pointer-events-none font-bold" />
                     </div>
                     <span className="text-sm text-text-muted group-hover:text-black transition-colors leading-relaxed">I confirm that the information provided is true and correct. I authorize Best Drive Motors to perform a credit check and use my details for the purpose of assessing this finance application. <span className="text-red-500">*</span></span>
                   </label>
@@ -860,10 +863,10 @@ export default function FinancePage() {
                     <div className="relative flex items-center mt-0.5">
                       <input type="checkbox" name="privacyConsent" checked={formData.privacyConsent} onChange={handleInputChange}
                         className="peer h-6 w-6 cursor-pointer appearance-none rounded border border-border-grey bg-background-dark checked:bg-primary checked:border-primary transition-all" />
-                      <span className="material-symbols-outlined absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-black opacity-0 peer-checked:opacity-100 text-lg pointer-events-none font-bold">check</span>
+                      <MdCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-black opacity-0 peer-checked:opacity-100 text-lg pointer-events-none font-bold" />
                     </div>
                     <span className="text-sm text-text-muted group-hover:text-black transition-colors leading-relaxed">
-                      I agree to the <a className="text-primary hover:text-primary-hover hover:underline" target="_blank" href="/privacy">Privacy Policy</a> <span className="text-red-500">*</span>
+                      I agree to the <a className="text-primary hover:text-primary-hover hover:underline" target="_blank" href="/our-privacy-policy">Privacy Policy</a> <span className="text-red-500">*</span>
                     </span>
                   </label>
                   {errorMessages.privacyConsent && <span className="text-xs text-red-400">{errorMessages.privacyConsent}</span>}
@@ -871,7 +874,7 @@ export default function FinancePage() {
                 <div className="flex flex-col items-center gap-6 pt-8 mt-10 border-t border-border-grey">
                   <div className="flex w-full flex-col md:flex-row justify-between items-center gap-4">
                     <button type="button" onClick={handlePreviousStep} className="order-2 md:order-1 cursor-pointer flex h-14 w-full md:w-32 items-center justify-center gap-2 rounded-lg border border-border-grey bg-transparent text-sm font-bold uppercase tracking-wide text-text-muted transition-all hover:bg-white/5 hover:text-black ">
-                      <span className="material-symbols-outlined text-lg">arrow_back</span> Back
+                      <MdArrowBack className="text-lg" /> Back
                     </button>
                     <button type="submit" onClick={handleSubmit} disabled={isLoading} className="order-1 md:order-2 w-full flex-1 rounded-lg bg-primary py-4 text-base font-bold uppercase tracking-widest text-white shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all hover:scale-[1.01] hover:bg-primary-hover hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed">
                       {isLoading ? 'Submitting...' : 'Submit Application'}

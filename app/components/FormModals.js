@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { MdClose, MdCheckCircle, MdVerifiedUser, MdSchedule, MdError, MdHourglassTop } from 'react-icons/md';
 
 export function SuccessModal({ isOpen, onClose, message }) {
   useEffect(() => {
@@ -28,23 +29,23 @@ export function SuccessModal({ isOpen, onClose, message }) {
           onMouseLeave={(e) => e.target.style.backgroundColor = '#002470'}
           aria-label="Close modal"
         >
-          <span className="material-symbols-outlined text-lg">close</span>
+          <MdClose className="text-lg" />
         </button>
         
         <div className="flex flex-col items-center text-center">
           <div className="flex size-16 items-center justify-center rounded-full mb-6" style={{ backgroundColor: '#002470', color: '#D4AF37' }}>
-            <span className="material-symbols-outlined text-4xl">check_circle</span>
+            <MdCheckCircle className="text-4xl" />
           </div>
           <h2 className="text-3xl font-black text-black mb-3">Success!</h2>
           <p className="text-sm text-gray-600 leading-relaxed mb-8">{message || 'Your finance application has been submitted successfully. We will review it shortly.'}</p>
           
           <div className="w-full space-y-3">
             <div className="flex items-center gap-3 text-sm text-gray-700">
-              <span className="material-symbols-outlined text-primary text-lg">verified_user</span>
+              <MdVerifiedUser className="text-primary text-lg" />
               <span>Application received and verified</span>
             </div>
             <div className="flex items-center gap-3 text-sm text-gray-700">
-              <span className="material-symbols-outlined text-primary text-lg">schedule</span>
+              <MdSchedule className="text-primary text-lg" />
               <span>We'll review your application within 24 hours</span>
             </div>
           </div>
@@ -98,12 +99,12 @@ export function ErrorModal({ isOpen, onClose, message, errors }) {
           onMouseLeave={(e) => e.target.style.backgroundColor = '#D62828'}
           aria-label="Close modal"
         >
-          <span className="material-symbols-outlined text-lg">close</span>
+          <MdClose className="text-lg" />
         </button>
 
         <div className="flex items-center gap-4 mb-6">
           <div className="flex size-14 items-center justify-center rounded-full bg-red-50 text-red-500 flex-shrink-0">
-            <span className="material-symbols-outlined text-3xl">error</span>
+            <MdError className="text-3xl" />
           </div>
           <h2 className="text-2xl font-black text-gray-900">Oops!</h2>
         </div>
@@ -145,12 +146,12 @@ export function LoadingModal({ isOpen, message = 'Submitting application...' }) 
           style={{ backgroundColor: '#002470' }}
           aria-label="Loading"
         >
-          <span className="material-symbols-outlined text-lg">close</span>
+          <MdClose className="text-lg" />
         </button>
 
         <div className="flex flex-col items-center gap-6">
           <div className="flex size-16 items-center justify-center rounded-full animate-spin" style={{ backgroundColor: '#002470', color: '#D4AF37' }}>
-            <span className="material-symbols-outlined text-3xl">hourglass_top</span>
+            <MdHourglassTop className="text-3xl" />
           </div>
           <div className="text-center">
             <p className="text-sm font-semibold text-gray-700">{message}</p>
