@@ -86,7 +86,7 @@ PERSONAL INFORMATION:
 - Date of Birth: ${formatDate(data.dateOfBirth)}
 - Marital Status: ${capitalizeFirstLetter(data.maritalStatus)}
 - Driver License Type: ${capitalizeFirstLetter(data.driverLicenceType)}
-- Driver License: ${data.driverLicenceNumber} (v${data.versionNumber})
+- Driver License: ${data.driverLicenceNumber} (${data.versionNumber})
 - License Expiry: ${formatDate(data.licenceExpiry)}
 - Email: ${data.email}
 - Phone: ${data.phone}

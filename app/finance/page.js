@@ -21,7 +21,7 @@ export default function FinancePage() {
     dateOfBirthDay: '', dateOfBirthMonth: '', dateOfBirthYear: '',
     driverLicenceType: '',
     driverLicenceNumber: '', versionNumber: '', 
-    licenceExpiryDay: '', licenceExpiryMonth: '', licenceExpiryYear: '',
+    licenceExpiryDay: '', licenceExpiryMonth: '', licenceExpiryYear: '20',
     maritalStatus: '',
     email: '', phone: '', licenceFront: '', licenceBack: '', currentAddress: '', suburb: '', postcode: '', residentialStatus: '',
     yearsAtAddress: '', monthsAtAddress: '', employmentStatus: '', employerName: '',
@@ -106,12 +106,28 @@ export default function FinancePage() {
         }
       }
     }
+
+        // Validate and constrain date year fields (4 digits)
+    if ((name === 'dateOfBirthYear' || name === 'licenceExpiryYear') && type === 'number') {
+      if (value && value.length > 4) {
+        // Keep only the first 4 digits
+        newValue = value.substring(0, 4);
+      }
+    }
     
     // Validate and constrain postcode field (max 4 digits)
     if (name === 'postcode' && type === 'number') {
       if (value && value.length > 4) {
         // Keep only the first 4 digits
         newValue = value.substring(0, 4);
+      }
+    }
+
+        // Validate and constrain version number field (max 3 digits)
+    if (name === 'versionNumber' && type === 'number') {
+      if (value && value.length > 3) {
+        // Keep only the first 4 digits
+        newValue = value.substring(0, 3);
       }
     }
     
@@ -290,7 +306,7 @@ export default function FinancePage() {
           dateOfBirthDay: '', dateOfBirthMonth: '', dateOfBirthYear: '',
           driverLicenceType: '',
           driverLicenceNumber: '', versionNumber: '', 
-          licenceExpiryDay: '', licenceExpiryMonth: '', licenceExpiryYear: '',
+          licenceExpiryDay: '', licenceExpiryMonth: '', licenceExpiryYear: '20',
           maritalStatus: '',
           email: '', phone: '', licenceFront: '', licenceBack: '', currentAddress: '', suburb: '', postcode: '', residentialStatus: '',
           yearsAtAddress: '', monthsAtAddress: '', employmentStatus: '', employerName: '',
@@ -583,7 +599,7 @@ export default function FinancePage() {
                             <>
                               <span className="material-symbols-outlined text-3xl text-text-muted group-hover:text-primary transition-colors">cloud_upload</span>
                               <span className="text-sm font-semibold text-text-muted group-hover:text-primary transition-colors">Click to upload or drag</span>
-                              <span className="text-xs text-text-muted">JPG, JPEG, PNG, PDF, SVG, WebP, GIF, TIFF (max 5MB)</span>
+                              <span className="text-xs text-text-muted">JPG, JPEG, PNG, PDF, SVG, WebP, GIF, TIFF (max 2MB)</span>
                             </>
                           )}
                         </div>
@@ -610,7 +626,7 @@ export default function FinancePage() {
                             <>
                               <span className="material-symbols-outlined text-3xl text-text-muted group-hover:text-primary transition-colors">cloud_upload</span>
                               <span className="text-sm font-semibold text-text-muted group-hover:text-primary transition-colors">Click to upload or drag</span>
-                              <span className="text-xs text-text-muted">JPG, JPEG, PNG, PDF, SVG, WebP, GIF, TIFF (max 5MB)</span>
+                              <span className="text-xs text-text-muted">JPG, JPEG, PNG, PDF, SVG, WebP, GIF, TIFF (max 2MB)</span>
                             </>
                           )}
                         </div>

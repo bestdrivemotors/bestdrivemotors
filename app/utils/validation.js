@@ -15,7 +15,7 @@ export const validatePhoneNZ = (phone) => {
 
 export const validateFileUpload = (file) => {
   if (!file) return false;
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = 2 * 1024 * 1024; // 2MB
   const allowedTypes = [
     'image/jpeg',      // JPG, JPEG
     'image/png',       // PNG
@@ -30,7 +30,7 @@ export const validateFileUpload = (file) => {
 
 export const getFileUploadError = (file) => {
   if (!file) return null;
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = 2 * 1024 * 1024; // 2MB
   const allowedTypes = [
     'image/jpeg', 'image/png', 'application/pdf', 'image/svg+xml',
     'image/webp', 'image/gif', 'image/tiff',
@@ -38,7 +38,7 @@ export const getFileUploadError = (file) => {
   
   if (file.size > maxSize) {
     const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-    return `File size ${sizeMB}MB exceeds 5MB limit`;
+    return `File size ${sizeMB}MB exceeds 2MB limit`;
   }
   if (!allowedTypes.includes(file.type)) {
     return 'Invalid file type. Please upload JPG, JPEG, PNG, PDF, SVG, WebP, GIF, or TIFF';
@@ -154,6 +154,11 @@ export const validateDateOfBirthFromParts = (day, month, year) => {
     return false;
   }
   
+  // Check if day is valid for the given month and year
+  if (!isValidDayForMonth(day, month, year)) {
+    return false;
+  }
+  
   const dateStr = combineDateFromParts(day, month, year);
   if (!dateStr) return false;
   
@@ -175,6 +180,30 @@ export const validateDateOfBirthFromParts = (day, month, year) => {
 };
 
 export const validateDateNotInPastFromParts = (day, month, year) => {
+  const dayNum = parseInt(day, 10);
+  const monthNum = parseInt(month, 10);
+  const yearNum = parseInt(year, 10);
+  
+  // Validate day (1-31)
+  if (!day || isNaN(dayNum) || dayNum < 1 || dayNum > 31) {
+    return false;
+  }
+  
+  // Validate month (1-12)
+  if (!month || isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+    return false;
+  }
+  
+  // Validate year
+  if (!year || isNaN(yearNum)) {
+    return false;
+  }
+  
+  // Check if day is valid for the given month and year
+  if (!isValidDayForMonth(day, month, year)) {
+    return false;
+  }
+  
   const dateStr = combineDateFromParts(day, month, year);
   if (!dateStr) return false;
   
@@ -186,6 +215,39 @@ export const validateDateNotInPastFromParts = (day, month, year) => {
   if (isNaN(selectedDate.getTime())) return false;
   
   return selectedDate >= today;
+};
+
+/**
+ * Validates if a day is valid for the given month and year
+ * Handles leap years correctly
+ */
+export const isValidDayForMonth = (day, month, year) => {
+  const dayNum = parseInt(day, 10);
+  const monthNum = parseInt(month, 10);
+  const yearNum = parseInt(year, 10);
+  
+  if (isNaN(dayNum) || isNaN(monthNum) || isNaN(yearNum)) {
+    return false;
+  }
+  
+  // Days in each month (non-leap year)
+  const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  
+  // Check if leap year
+  const isLeapYear = (yearNum % 4 === 0 && yearNum % 100 !== 0) || (yearNum % 400 === 0);
+  
+  // Adjust February for leap year
+  if (isLeapYear && monthNum === 2) {
+    daysInMonth[1] = 29;
+  }
+  
+  // Validate month is between 1-12
+  if (monthNum < 1 || monthNum > 12) {
+    return false;
+  }
+  
+  // Validate day is between 1 and the max days in that month
+  return dayNum >= 1 && dayNum <= daysInMonth[monthNum - 1];
 };
 
 /**
