@@ -24,6 +24,7 @@ export default function FinancePage() {
     driverLicenceNumber: '', versionNumber: '', 
     licenceExpiryDay: '', licenceExpiryMonth: '', licenceExpiryYear: '20',
     maritalStatus: '',
+    residency: '',
     email: '', phone: '', licenceFront: '', licenceBack: '', currentAddress: '', suburb: '', postcode: '', residentialStatus: '',
     yearsAtAddress: '', monthsAtAddress: '', employmentStatus: '', employerName: '',
     occupation: '', yearsAtEmployment: '', monthsAtEmployment: '', income: '', payFrequency: '', dependents: '', rentMortgage: '',
@@ -309,6 +310,7 @@ export default function FinancePage() {
           driverLicenceNumber: '', versionNumber: '', 
           licenceExpiryDay: '', licenceExpiryMonth: '', licenceExpiryYear: '20',
           maritalStatus: '',
+          residency: '',
           email: '', phone: '', licenceFront: '', licenceBack: '', currentAddress: '', suburb: '', postcode: '', residentialStatus: '',
           yearsAtAddress: '', monthsAtAddress: '', employmentStatus: '', employerName: '',
           occupation: '', yearsAtEmployment: '', monthsAtEmployment: '', income: '', payFrequency: '', dependents: '', rentMortgage: '',
@@ -488,6 +490,22 @@ export default function FinancePage() {
                         <option value="divorced">Divorced</option>
                       </select>
                       {errorMessages.maritalStatus && <span className="text-xs text-red-400">{errorMessages.maritalStatus}</span>}
+                    </label>
+                    <label className="flex flex-col gap-2 group">
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Residency Status <span className="text-red-500">*</span></span>
+                      <select name="residency" value={formData.residency} onChange={handleInputChange}
+                        className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black focus:ring-1 outline-none transition-all ${
+                          errorMessages.residency ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`}>
+                        <option value="">Please choose an option</option>
+                        <option value="Citizen">NZ Citizen</option>
+                        <option value="Permanent Resident Visa">Permanent Resident Visa</option>
+                        <option value="Resident Visa">Resident Visa</option>
+                        <option value="Work Visa">Work Visa</option>
+                        <option value="Student Visa">Student Visa</option>
+                        <option value="Holiday Visa">Holiday Visa</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      {errorMessages.residency && <span className="text-xs text-red-400">{errorMessages.residency}</span>}
                     </label>
                   </div>
                 </div>

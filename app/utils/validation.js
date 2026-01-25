@@ -292,6 +292,10 @@ export const validateStep1 = (data) => {
     errors.maritalStatus = 'Marital status is required';
   }
 
+  if (!data.residency) {
+    errors.residency = 'Residency status is required';
+  }
+
   if (!validateEmail(data.email)) {
     errors.email = 'Valid email address is required';
   }

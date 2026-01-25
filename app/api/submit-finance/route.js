@@ -85,6 +85,7 @@ PERSONAL INFORMATION:
 - Full Name: ${data.firstName} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName}
 - Date of Birth: ${formatDate(data.dateOfBirth)}
 - Marital Status: ${capitalizeFirstLetter(data.maritalStatus)}
+- Residency Status: ${data.residency}
 - Driver License Type: ${capitalizeFirstLetter(data.driverLicenceType)}
 - Driver License: ${data.driverLicenceNumber} (${data.versionNumber})
 - License Expiry: ${formatDate(data.licenceExpiry)}
