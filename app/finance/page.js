@@ -117,12 +117,9 @@ export default function FinancePage() {
       }
     }
     
-    // Validate and constrain postcode field (max 4 digits)
-    if (name === 'postcode' && type === 'number') {
-      if (value && value.length > 4) {
-        // Keep only the first 4 digits
-        newValue = value.substring(0, 4);
-      }
+    // Validate and constrain postcode field (digits only, max 4)
+    if (name === 'postcode') {
+      newValue = value.replace(/\D/g, '').substring(0, 4);
     }
 
         // Validate and constrain version number field (max 3 digits)
@@ -695,7 +692,7 @@ export default function FinancePage() {
                   </label>
                   <label className="flex flex-col gap-2 group">
                     <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Postcode <span className="text-red-500">*</span></span>
-                    <input type="number" name="postcode" value={formData.postcode} onChange={handleInputChange} placeholder="e.g. 2104" min="1000" max="9999"
+                    <input type="text" inputMode="numeric" name="postcode" value={formData.postcode} onChange={handleInputChange} placeholder="e.g. 0454" maxLength={4}
                       className={`h-12 w-full rounded-lg border bg-input-bg px-4 text-black placeholder-text-muted/50 focus:ring-1 outline-none transition-all ${
                         errorMessages.postcode ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-border-grey focus:border-primary focus:ring-primary'}`} />
                     {errorMessages.postcode && <span className="text-xs text-red-400">{errorMessages.postcode}</span>}

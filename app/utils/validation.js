@@ -83,10 +83,9 @@ export const validateDateOfBirth = (date) => {
 };
 
 export const validatePostcode = (postcode) => {
-  // NZ postcodes are exactly 4 digits (1000-9999)
+  // NZ postcodes are exactly 4 digits (may start with 0, e.g. 0454)
   if (!postcode || postcode === '') return false;
-  const num = parseInt(postcode, 10);
-  return !isNaN(num) && num >= 1000 && num <= 9999;
+  return /^\d{4}$/.test(postcode.toString().trim());
 };
 
 export const validateAddress = (address) => {
