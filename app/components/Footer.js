@@ -2,10 +2,13 @@
 
 import Link from 'next/link';
 import { MdCall, MdMail } from 'react-icons/md';
+import { FaFacebookF, FaInstagram } from 'react-icons/fa';
+import { dealershipContact } from '@/lib/contact';
+import { trackPublicAnalyticsEvent } from '@/lib/analytics/events';
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border-subtle bg-card-dark px-6 py-16 text-white md:px-12 lg:px-20">
+    <footer className="border-t border-neutral-800 bg-neutral-950 px-5 py-12 text-white sm:px-8 lg:px-12">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
         {/* Brand Section */}
         <div className="flex flex-col gap-6">
@@ -18,26 +21,22 @@ export default function Footer() {
             </h2>
           </Link>
           <p className="text-sm text-white leading-relaxed">
-            South Auckland&apos;s destination for quality used vehicles and competitive finance solutions. Excellence in every drive.
+            Used vehicles and finance assistance in South Auckland.
           </p>
           <div className="flex gap-4">
             <a
-              href="#"
-              className="flex size-10 items-center justify-center rounded-lg bg-card-dark border border-border-subtle text-white hover:text-white hover:border-primary hover:bg-primary transition-all"
+              aria-label="Best Drive Motors on Facebook"
+              href="https://www.facebook.com/bestdrivemotors"
+              className="flex size-10 items-center justify-center border border-white/20 text-white transition-colors hover:border-primary hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              <span className="text-xs font-bold">FB</span>
+              <FaFacebookF aria-hidden="true" />
             </a>
             <a
-              href="#"
-              className="flex size-10 items-center justify-center rounded-lg bg-card-dark border border-border-subtle text-white hover:text-white hover:border-primary hover:bg-primary transition-all"
+              aria-label="Best Drive Motors on Instagram"
+              href="https://www.instagram.com/bestdrivemotors"
+              className="flex size-10 items-center justify-center border border-white/20 text-white transition-colors hover:border-primary hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              <span className="text-xs font-bold">IG</span>
-            </a>
-            <a
-              href="#"
-              className="flex size-10 items-center justify-center rounded-lg bg-card-dark border border-border-subtle text-white hover:text-white hover:border-primary hover:bg-primary transition-all"
-            >
-              <span className="text-xs font-bold">YT</span>
+              <FaInstagram aria-hidden="true" />
             </a>
           </div>
         </div>
@@ -58,17 +57,18 @@ export default function Footer() {
             </li> */}
             <li className="flex items-center gap-3 group">
               <MdCall className="text-primary text-xl group-hover:scale-110 transition-transform" />
-              <a className="hover:text-primary transition-colors" href="tel:0800BESTDRIVE">
-                022 435 3449
+              <a className="transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" href={dealershipContact.phone.href} onClick={() => trackPublicAnalyticsEvent('contact_click', { method: 'phone' })}>
+                {dealershipContact.phone.label}
               </a>
             </li>
             <li className="flex items-center gap-3 group">
               <MdMail className="text-primary text-xl group-hover:scale-110 transition-transform" />
               <a
                 className="hover:text-primary transition-colors"
-                href="mailto:bestdrivemotors@outlook.co.nz"
+                href={dealershipContact.email.href}
+                onClick={() => trackPublicAnalyticsEvent('contact_click', { method: 'email' })}
               >
-                bestdrivemotors@outlook.co.nz
+                {dealershipContact.email.label}
               </a>
             </li>
           </ul>
@@ -129,7 +129,7 @@ export default function Footer() {
 
       {/* Bottom Section */}
       <div className="mt-12 flex flex-col md:flex-row items-center justify-between border-t border-border-subtle pt-8 text-xs text-white gap-4">
-        <p>© 2025 Best Drive Motors. All rights reserved.</p>
+        <p>Best Drive Motors. All rights reserved.</p>
       </div>
     </footer>
   );

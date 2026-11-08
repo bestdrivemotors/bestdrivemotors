@@ -4,7 +4,7 @@ import Link from 'next/link';
 const currency = new Intl.NumberFormat('en-NZ', { style: 'currency', currency: 'NZD', maximumFractionDigits: 0 });
 const number = new Intl.NumberFormat('en-NZ');
 
-export default function VehicleCard({ vehicle }) {
+export default function VehicleCard({ vehicle, priority = false }) {
   const cover = vehicle.images?.find((image) => image.isCover) ?? vehicle.images?.[0];
   const imageUrl = cover?.thumbUrl || cover?.url;
 
@@ -13,7 +13,7 @@ export default function VehicleCard({ vehicle }) {
       <Link aria-label={`${vehicle.year} ${vehicle.makeName} ${vehicle.modelName}`} className="group block" href={`/vehicles/${vehicle.slug}`}>
         <div className="relative aspect-[4/3] bg-zinc-200">
           {imageUrl ? (
-            <Image alt={`${vehicle.year} ${vehicle.makeName} ${vehicle.modelName}`} className="object-cover transition-transform duration-300 group-hover:scale-[1.02]" fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" src={imageUrl} />
+            <Image alt={`${vehicle.year} ${vehicle.makeName} ${vehicle.modelName}`} className="object-cover transition-transform duration-300 group-hover:scale-[1.02]" fill priority={priority} sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 2rem), (max-width: 1280px) 25vw, 22rem" src={imageUrl} />
           ) : (
             <div className="flex h-full items-center justify-center bg-zinc-200 text-xs font-semibold uppercase tracking-wide text-zinc-500">Photos coming soon</div>
           )}

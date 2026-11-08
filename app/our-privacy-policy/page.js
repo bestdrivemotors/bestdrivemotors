@@ -6,32 +6,32 @@ export default function PrivacyPage() {
 
   return (
     <>
-      <main className="flex flex-col items-center px-4 py-8 md:py-12 md:px-12 lg:px-20 bg-background-dark min-h-screen">
-        <div className="w-full max-w-[900px]">
+      <main className="min-h-screen bg-white px-5 py-10 text-zinc-950 sm:px-8 sm:py-14 lg:px-12">
+        <div className="mx-auto w-full max-w-3xl">
           {/* Header Section */}
           <div className="mb-12 flex flex-col gap-6">
             <div>
-              <div className="mb-3 flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs">
+              <div className="mb-3 flex items-center gap-2 text-primary font-bold uppercase text-xs">
                 <MdPrivacyTip className="text-sm" />
                 Legal & Privacy
               </div>
-              <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight text-black lg:text-5xl">
+              <h1 className="text-3xl font-black leading-tight sm:text-4xl">
                 Privacy Act Statement
               </h1>
-              <p className="mt-4 text-base md:text-lg text-text-muted font-light">
+              <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-600 md:text-lg">
                 Please read and accept our Privacy Act Statement before proceeding with your finance application.
               </p>
             </div>
           </div>
 
           {/* Privacy Statement Content */}
-          <div className="bg-background-dark">
+          <div>
             {/* Section 1: The Privacy Act 2020 */}
             <section>
               {/* <h2 className="text-2xl font-bold text-black mb-6">
                 Privacy Act Statement
               </h2> */}
-              <div className="space-y-4 text-text-muted leading-relaxed">
+              <div className="space-y-5 border-l-2 border-zinc-200 pl-5 text-sm leading-7 text-zinc-700 sm:pl-7 sm:text-base">
                 <p>
                   I/we authorise Best Drive Motors<span className="text-primary">*</span> to collect, retain and use the personal information about me/us, for the purposes of:
                 </p>
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
                   </li>
                   <li className="flex gap-3">
                     <span className="text-primary font-bold flex-shrink-0">•</span>
-                    <span>Attending to the financing, whether directly or indirectly, of my/our contract(s) and enforcing Best Drive Motors's rights thereunder;</span>
+                    <span>Attending to the financing, whether directly or indirectly, of my/our contract(s) and enforcing Best Drive Motors&apos;s rights thereunder;</span>
                   </li>
                   <li className="flex gap-3">
                     <span className="text-primary font-bold flex-shrink-0">•</span>

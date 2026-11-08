@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { validateStep1, validateStep2, validateStep3, validateStep4, getFileUploadError } from '@/app/utils/validation';
 import { SuccessModal, ErrorModal, LoadingModal } from '@/app/components/FormModals';
+import { trackPublicAnalyticsEvent } from '@/lib/analytics/events';
+import AnswerFaq from '@/app/components/AnswerFaq';
 import { MdVerifiedUser, MdCheck, MdPerson, MdMail, MdSmartphone, MdCheckCircle, MdCloudUpload, MdError, MdArrowForward, MdHome, MdSearch, MdArrowBack, MdWork, MdPayment, MdLock } from 'react-icons/md';
 
 const STORAGE_KEY = 'finance_form_data';
@@ -16,6 +18,7 @@ export default function FinancePage() {
   const [errorMessages, setErrorMessages] = useState({});
   const [completedSteps, setCompletedSteps] = useState(new Set());
   const formRef = useRef(null);
+  const financeStartTracked = useRef(false);
 
   const [formData, setFormData] = useState({
     firstName: '', middleName: '', lastName: '', 
@@ -213,6 +216,10 @@ export default function FinancePage() {
 
   const handleNextStep = () => {
     if (validateCurrentStep()) {
+      if (currentStep === 1 && !financeStartTracked.current) {
+        trackPublicAnalyticsEvent('finance_start', { source: 'finance_form' });
+        financeStartTracked.current = true;
+      }
       const newCompleted = new Set(completedSteps);
       newCompleted.add(currentStep);
       setCompletedSteps(newCompleted);
@@ -297,6 +304,8 @@ export default function FinancePage() {
       });
       const data = await response.json();
       if (response.ok) {
+        trackPublicAnalyticsEvent('finance_success', { source: 'finance_form' });
+        financeStartTracked.current = false;
         setShowSuccess(true);
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(COMPLETED_STEPS_KEY);
@@ -338,20 +347,20 @@ export default function FinancePage() {
 
   return (
     <>
-      <main className="flex flex-col items-center py-8 px-6 bg-background-dark">
+      <main className="min-h-screen flex flex-col items-center px-4 py-8 bg-zinc-50 sm:px-6 lg:px-8 lg:py-12">
         <div className="w-full max-w-7xl ">
           <div className="mb-4 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <div className="mb-3 flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs">
                 <MdVerifiedUser className="text-sm" />
-                Secure Finance Application
+                Finance assistance
               </div>
-              <h1 className="text-2xl font-black leading-tight tracking-tight text-black">Quick Finance Application</h1>
-              <p className="mt-4 text-base md:text-lg text-text-muted font-light">Apply for vehicle finance with a simple, secure 4-step process.</p>
+              <h1 className="text-2xl font-black leading-tight text-zinc-950 sm:text-3xl">Vehicle finance application</h1>
+              <p className="mt-4 text-base leading-7 text-zinc-600 md:text-lg">Complete an application for vehicle finance with Best Drive Motors.</p>
             </div>
           </div>
 
-          <form className="flex flex-col relative border border-black" ref={formRef}>
+          <form className="relative flex flex-col overflow-hidden border border-zinc-200 bg-white shadow-sm" ref={formRef}>
 
 
             <input checked={currentStep === 1} className="peer/step1 hidden" id="step1" name="steps" type="radio" readOnly />
@@ -360,7 +369,7 @@ export default function FinancePage() {
             <input checked={currentStep === 4} className="peer/step4 hidden" id="step4" name="steps" type="radio" readOnly />
 
             <div className="bg-background-dark overflow-hidden">
-              <nav className="grid grid-cols-4 gap-0 relative z-10 w-full bg-card-dark/30">
+              <nav aria-label="Application steps" className="relative z-10 grid w-full grid-cols-4 gap-0 border-b border-zinc-200 bg-zinc-100">
                 {[1, 2, 3, 4].map((step) => {
                   const status = getStepStatus(step);
                   const stepLabels = ['Personal', 'Residential', 'Employment', 'Financial'];
@@ -371,15 +380,15 @@ export default function FinancePage() {
                   return (
                     <button key={step} type="button" onClick={() => isAccessible && handleStepChange(step)} disabled={!isAccessible}
                       className={`relative flex flex-col items-center justify-center py-4 transition-all duration-300 cursor-pointer group
-                        ${status === 'active' ? 'bg-card-dark' :
-                          status === 'completed' ? 'bg-card-dark/60 hover:bg-card-dark' :
-                          status === 'disabled' ? 'opacity-40 cursor-not-allowed' : 'hover:bg-card-dark/50'}`}>
+                        ${status === 'active' ? 'bg-zinc-950' :
+                          status === 'completed' ? 'bg-red-50 hover:bg-red-100' :
+                          status === 'disabled' ? 'cursor-not-allowed opacity-40' : 'hover:bg-white'}`}>
                       <div className="flex items-center gap-2 relative z-10">
                         <div className={`size-8 rounded-full flex items-center justify-center border transition-all duration-300
-                          ${status === 'active' ? 'border-primary bg-primary text-black shadow-[0_0_15px_rgba(212,175,55,0.3)]' :
-                            status === 'completed' ? 'border-primary bg-primary/20 text-primary' :
-                            status === 'disabled' ? 'border-border-grey bg-background-dark text-text-muted' :
-                            'border-border-grey bg-card-dark text-text-muted hover:border-primary'}`}>
+                          ${status === 'active' ? 'border-primary bg-primary text-white' :
+                            status === 'completed' ? 'border-primary bg-red-50 text-primary' :
+                            status === 'disabled' ? 'border-zinc-300 bg-white text-zinc-400' :
+                            'border-zinc-300 bg-white text-zinc-700 hover:border-primary'}`}>
                           {status === 'completed' ? <MdCheck className="text-sm" /> :
                             <StepIcon className="text-sm" />}
                         </div>
@@ -534,7 +543,7 @@ export default function FinancePage() {
                 </div>
 
                 <div className="mb-8">
-                  <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-white px-4 py-3 rounded-lg" style={{ backgroundColor: '#002470', borderBottom: '2px solid #00173f' }}>Driver's Licence Details</h3>
+                  <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-white px-4 py-3 rounded-lg" style={{ backgroundColor: '#002470', borderBottom: '2px solid #00173f' }}>Driver Licence Details</h3>
                   <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                     <label className="flex flex-col gap-2 group">
                       <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-focus-within:text-primary transition-colors">Drivers Licence Type <span className="text-red-500">*</span></span>
@@ -596,7 +605,7 @@ export default function FinancePage() {
 
                 <div className="mb-8">
                   <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-white px-4 py-3 rounded-lg" style={{ backgroundColor: '#002470', borderBottom: '2px solid #00173f' }}>Licence Documentation</h3>
-                  <p className="text-sm text-text-muted mb-6">Please upload clear images or PDFs of both sides of your driver's licence.</p>
+                  <p className="text-sm text-text-muted mb-6">Please upload clear images or PDFs of both sides of your driver licence.</p>
                   <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                     <label className="flex flex-col gap-4 group cursor-pointer">
                       <span className="text-xs font-bold uppercase tracking-wider text-text-muted group-hover:text-primary transition-colors">Licence Front (Image/PDF)</span>
@@ -905,6 +914,14 @@ export default function FinancePage() {
           </form>
         </div>
       </main>
+
+      <AnswerFaq
+        title="Finance application questions"
+        items={[
+          { question: 'How do I start a vehicle finance application?', answer: 'Complete the online four-step finance application. An application does not guarantee approval.' },
+          { question: 'Can I review the privacy statement before applying?', answer: 'Yes. Read the Best Drive Motors privacy statement before proceeding with the application.' },
+        ]}
+      />
 
       <SuccessModal isOpen={showSuccess} onClose={() => setShowSuccess(false)} message="Your finance application has been submitted successfully! We will review it shortly and contact you within 24 hours." />
       <ErrorModal isOpen={showError} onClose={() => setShowError(false)} errors={errorMessages} message="Please correct the errors below to continue:" />

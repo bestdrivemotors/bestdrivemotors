@@ -6,21 +6,21 @@ Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /*.json$
-Disallow: /*?*sort=
-Disallow: /*?*filter=
+Disallow: /admin
 
 # Sitemaps
 Sitemap: https://bestdrivemotors.co.nz/sitemap.xml
 
-# Crawl delay for bots (in seconds)
-Crawl-delay: 1
-
 # Allow Google Bot faster crawling
 User-agent: Googlebot
-Crawl-delay: 0
 Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /admin
 
 # Allow Bing Bot
 User-agent: Bingbot
-Crawl-delay: 1
 Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /admin

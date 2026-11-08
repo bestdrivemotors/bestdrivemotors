@@ -24,17 +24,17 @@ export default function AdminFrame({ children }) {
   return (
     <div className="min-h-screen bg-zinc-100 text-zinc-950">
       <header className="border-b border-zinc-800 bg-zinc-950 text-white">
-        <div className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:flex-nowrap lg:px-8">
           <Link className="text-sm font-black uppercase tracking-wide" href="/admin/vehicles">
             Best Drive <span className="text-red-500">Admin</span>
           </Link>
-          <div className="flex items-center gap-1 sm:gap-3">
-            <nav aria-label="Admin" className="flex items-center gap-1">
+          <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:gap-3">
+            <nav aria-label="Admin" className="flex min-w-0 items-center gap-1 overflow-x-auto">
               {navigation.map((item) => (
                 <Link
                   key={item.href}
                   aria-current={pathname.startsWith(item.href) ? 'page' : undefined}
-                  className={`px-3 py-2 text-sm font-semibold transition-colors ${pathname.startsWith(item.href) ? 'bg-zinc-800 text-white' : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'}`}
+                  className={`whitespace-nowrap px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 ${pathname.startsWith(item.href) ? 'bg-zinc-800 text-white' : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'}`}
                   href={item.href}
                 >
                   {item.label}
@@ -43,7 +43,7 @@ export default function AdminFrame({ children }) {
             </nav>
             <button
               aria-label="Sign out"
-              className="inline-flex size-10 items-center justify-center text-zinc-300 hover:bg-zinc-900 hover:text-white"
+              className="inline-flex size-10 shrink-0 items-center justify-center text-zinc-300 hover:bg-zinc-900 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
               onClick={signOut}
               title="Sign out"
               type="button"

@@ -1,10 +1,10 @@
 export const metadata = {
-  title: "Vehicle Finance Application | Best Drive Motors Auckland",
-  description: "Apply for vehicle finance with Best Drive Motors. Quick and secure 4-step finance application process for cars in Auckland. Flexible payment options and easy approval.",
-  keywords: "car finance Auckland, vehicle loan, auto loan NZ, car financing, easy finance approval",
+  title: "Vehicle Finance Application in South Auckland",
+  description: "Read about vehicle finance assistance and start the four-step application at Best Drive Motors in South Auckland.",
+  alternates: { canonical: "/finance" },
   openGraph: {
     title: "Vehicle Finance Application | Best Drive Motors",
-    description: "Apply for vehicle finance with our quick and secure 4-step process",
+    description: "Read about vehicle finance assistance and start an application in South Auckland.",
     url: "https://bestdrivemotors.co.nz/finance",
   },
 };

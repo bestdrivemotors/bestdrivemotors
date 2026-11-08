@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono, Be_Vietnam_Pro, Noto_Sans } from "next/font/google";
 import "./globals.css";
 import SiteChrome from "./components/SiteChrome";
+import { buildLocalBusinessSchema } from "@/lib/seo/metadata";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,9 +26,11 @@ const notoSans = Noto_Sans({
 });
 
 export const metadata = {
-  title: "Best Drive Motors | Quality Used Cars in Auckland",
-  description: "Find your perfect car at Best Drive Motors. Quality used vehicles with flexible finance options in Auckland. Easy approval process and reliable service.",
-  keywords: "used cars Auckland, car finance Auckland, car loans NZ, vehicle finance New Zealand, second hand cars, auto loans",
+  title: {
+    default: "Best Drive Motors | Used Vehicles in South Auckland",
+    template: "%s | Best Drive Motors",
+  },
+  description: "Browse available used vehicles and explore finance assistance at Best Drive Motors in South Auckland, New Zealand.",
   icons: {
     icon: "/best-drive-motor-title-logo.svg",
   },
@@ -48,8 +51,8 @@ export const metadata = {
     locale: "en_NZ",
     url: "https://bestdrivemotors.co.nz",
     siteName: "Best Drive Motors",
-    title: "Best Drive Motors | Quality Used Cars in Auckland",
-    description: "Find your perfect car at Best Drive Motors. Quality used vehicles with flexible finance options in Auckland.",
+    title: "Best Drive Motors | Used Vehicles in South Auckland",
+    description: "Browse available vehicles and explore finance assistance in South Auckland.",
     images: [
       {
         url: "/best-deal-motors-logo.png",
@@ -61,8 +64,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Best Drive Motors | Quality Used Cars in Auckland",
-    description: "Find your perfect car at Best Drive Motors. Quality used vehicles with flexible finance options.",
+    title: "Best Drive Motors | Used Vehicles in South Auckland",
+    description: "Browse available vehicles and explore finance assistance in South Auckland.",
   },
   alternates: {
     canonical: "https://bestdrivemotors.co.nz",
@@ -73,53 +76,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* Schema.org structured data for Organization */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "Best Drive Motors",
-              "url": "https://bestdrivemotors.co.nz",
-              "logo": "https://bestdrivemotors.co.nz/best-deal-motors-logo.png",
-              "description": "Quality used cars with flexible finance options in Auckland, New Zealand",
-              "address": {
-                "@type": "PostalAddress",
-                "addressLocality": "Auckland",
-                "addressRegion": "Auckland",
-                "addressCountry": "NZ"
-              },
-              "sameAs": [
-                "https://www.facebook.com/bestdrivemotors",
-                "https://www.instagram.com/bestdrivemotors"
-              ]
-            }),
-          }}
-        />
-        {/* Schema.org structured data for LocalBusiness */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "LocalBusiness",
-              "name": "Best Drive Motors",
-              "image": "https://bestdrivemotors.co.nz/best-deal-motors-logo.png",
-              "description": "Quality used cars with flexible finance options",
-              "address": {
-                "@type": "PostalAddress",
-                "addressLocality": "Auckland",
-                "addressRegion": "Auckland",
-                "postalCode": "2104",
-                "addressCountry": "NZ"
-              },
-              "areaServed": {
-                "@type": "City",
-                "name": "Auckland"
-              },
-              "serviceType": ["Car Sales", "Vehicle Finance", "Auto Loans"]
-            }),
+            __html: JSON.stringify(buildLocalBusinessSchema()),
           }}
         />
       </head>
