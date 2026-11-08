@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { MdArrowForward } from 'react-icons/md';
 
@@ -5,9 +6,12 @@ export default function Hero() {
   return (
     <section className="relative flex items-center justify-center overflow-hidden md:p-10 p-5">
       <div className="absolute inset-0 z-0">
-        <img
+        <Image
           alt="Luxury Car"
-          className="h-full w-full object-cover opacity-60"
+          className="object-cover opacity-60"
+          fill
+          priority
+          sizes="100vw"
           src="/hero-bg.jpg"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/120 to-transparent"></div>
@@ -18,7 +22,7 @@ export default function Hero() {
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 backdrop-blur-sm">
             <span className="size-2 rounded-full bg-primary animate-pulse"></span>
             <span className="text-xs font-bold uppercase tracking-widest text-primary">
-              South Auckland's Dealership
+              South Auckland&apos;s Dealership
             </span>
           </div>
           <h1 className="font-display text-3xl font-black leading-tight tracking-tight text-white">
@@ -30,7 +34,7 @@ export default function Hero() {
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Link
-              href="#stock"
+              href="/vehicles"
               className="flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-bold text-white shadow-[0_0_20px_rgba(212,175,55,0.2)] transition-all hover:bg-primary-hover hover:-translate-y-1"
             >
               View Stock

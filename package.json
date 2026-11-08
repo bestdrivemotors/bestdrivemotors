@@ -6,20 +6,28 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "db:migrate": "node lib/db/migrate.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1160.0",
+    "@better-auth/kysely-adapter": "^1.7.14",
+    "better-auth": "^1.7.14",
+    "kysely": "^0.29.7",
     "next": "16.0.10",
     "nodemailer": "^6.9.7",
     "postcss": "^8.5.6",
     "react": "19.2.1",
     "react-dom": "19.2.1",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
     "eslint": "^9",
     "eslint-config-next": "16.0.10",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "vitest": "^5.0.5"
   }
 }

@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Header() {
@@ -23,14 +22,11 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Finance Button */}
-        <Link
-          href="/finance"
-          className="group h-10 cursor-pointer flex items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-bold tracking-wide text-white transition-all hover:bg-primary-hover hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-        >
-          {/* <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span> */}
-          <span>Finance</span>
-        </Link>
+        <nav aria-label="Main navigation" className="flex items-center gap-2 sm:gap-4">
+          <Link className="px-2 py-2 text-sm font-semibold text-white hover:text-primary" href="/vehicles">Vehicles</Link>
+          <Link className="px-2 py-2 text-sm font-semibold text-white hover:text-primary" href="/search">Search</Link>
+          <Link className="flex h-10 items-center justify-center bg-primary px-4 text-sm font-bold text-white transition-colors hover:bg-primary-hover sm:px-5" href="/finance">Finance</Link>
+        </nav>
       </div>
     </header>
   );

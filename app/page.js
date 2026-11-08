@@ -1,6 +1,10 @@
 import Hero from "./components/Hero";
 import Features from "./components/Features";
 import FinanceSection from "./components/FinanceSection";
+import FeaturedCarousel from "./components/FeaturedCarousel";
+import { featuredVehicles, getPublicInventory } from "@/lib/inventory/snapshot";
+
+export const revalidate = 300;
 
 export const metadata = {
   title: "Best Drive Motors | Quality Used Cars & Finance in Auckland",
@@ -14,10 +18,12 @@ export const metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const vehicles = featuredVehicles(await getPublicInventory());
   return (
     <>
       <Hero />
+      <FeaturedCarousel vehicles={vehicles} />
       <Features />
       <FinanceSection />
     </>

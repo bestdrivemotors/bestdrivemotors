@@ -1,7 +1,6 @@
 import { Geist, Geist_Mono, Be_Vietnam_Pro, Noto_Sans } from "next/font/google";
 import "./globals.css";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
+import SiteChrome from "./components/SiteChrome";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -127,9 +126,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${beVietnamPro.variable} ${notoSans.variable} antialiased`}
       >
-        <Header />
-        {children}
-        <Footer />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );

@@ -18,7 +18,7 @@ export default function Footer() {
             </h2>
           </Link>
           <p className="text-sm text-white leading-relaxed">
-            South Auckland's destination for quality used vehicles and competitive finance solutions. Excellence in every drive.
+            South Auckland&apos;s destination for quality used vehicles and competitive finance solutions. Excellence in every drive.
           </p>
           <div className="flex gap-4">
             <a
@@ -78,6 +78,16 @@ export default function Footer() {
         <div className="flex flex-col gap-6">
           <h4 className="text-lg font-bold text-white font-display">Explore</h4>
           <ul className="flex flex-col gap-3 text-sm text-white">
+            <li>
+              <Link className="hover:text-primary hover:translate-x-1 inline-block transition-all" href="/vehicles">
+                Vehicles
+              </Link>
+            </li>
+            <li>
+              <Link className="hover:text-primary hover:translate-x-1 inline-block transition-all" href="/search">
+                Search
+              </Link>
+            </li>
             <li>
               <Link
                 className="hover:text-primary hover:translate-x-1 inline-block transition-all"
